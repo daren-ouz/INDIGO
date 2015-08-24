@@ -72,5 +72,5 @@ write_files:
                                 ccccccc:
 
 
-#runcmd:
-#  - su -l stack ./start.sh
+runcmd:
+  - su -l stack ./start.sh
