@@ -62,8 +62,8 @@ write_files:
       insserv -v opennebula-sunstone
       
       # change oneadmin's password
-      su  oneadmin -c "oneuser passwd oneadmin 'password'"
-      echo "oneadmin:password" > /var/lib/one/.one/one_auth
+      su  oneadmin -c "oneuser passwd oneadmin 'opennebula'"
+      echo "oneadmin:opennebula" > /var/lib/one/.one/one_auth
       #su  oneadmin -c "one restart"
       
       # Install ONe node
