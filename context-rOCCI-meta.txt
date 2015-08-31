@@ -1,0 +1,93 @@
+#cloud-config
+# see https://help.ubuntu.com/community/CloudInit
+
+bootcmd:
+- test -L /etc/motd && unlink /etc/motd || /bin/true
+
+mounts:
+- [vdc,none,swap,sw,0,0]
+- [vdd,/scratch,ext3,defaults,2,0]
+
+
+write_files:
+  - path: /etc/nologin
+    content: |2
+    
+      *** Initial configuration by cloud-init is in progress. Please wait. ***
+
+  - path: /etc/motd
+    content: |2
+                                     cccccccc
+                                   ::       :::
+                                 :c            c:
+                                 c              c::
+                             ::::c:             :  :::
+                 :::::::::::c:     :                :c:::::::::::
+               :::          :                      ::            :::
+              c:   __  __      _         ____ _                 _  :c
+         :::::c:  |  \/  | ___| |_ __ _ / ___| | ___  _   _  __| |   c
+       :::        | |\/| |/ _ \ __/ _` | |   | |/ _ \| | | |/ _` |  :::::::
+      c           | |  | |  __/ || (_| | |___| | (_) | |_| | (_| |        ::
+      c           |_|  |_|\___|\__\__,_|\____|_|\___/ \__,_|\__,_|         c
+       :::                                                          :     c:
+          ::::c:               cloud@metacentrum.cz      :        :cc:::::
+                :::c                                    :c:::::::::
+                   ::::::::::            ::          :::
+                            :::::      :::::::::::::::
+                                ccccccc:
+
+  - path: /var/tmp/INSTALL
+    permissions: 0755
+    content: |2
+
+      #!/bin/bash
+      set -x
+      
+      echo "rOOCI installation start"
+     
+      # Get occi-server
+      apt-key adv --fetch-keys http://repository.egi.eu/community/keys/APPDBCOMM-DEB-PGP-KEY.asc
+      cd /etc/apt/sources.list.d
+      wget http://repository.egi.eu/community/software/rocci.server/1.1.x/releases/repofiles/debian-wheezy-amd64.list
+
+      # hack enabling to glue deb7 occi with deb8 OS
+      cat >>/etc/apt/preferences.d/10_rocci.pref <<EOF
+      Package: *
+      Pin: release o=Debian,n=jessie
+      Pin-Priority: 650
+      EOF
+
+      apt-get update
+      apt-get install -y occi-server
+
+      if ( ! grep "Listen\s*11443" /etc/apache2/ports.conf); then echo Listen 11443 >> /etc/apache2/ports.conf; fi
+
+      a2enmod ssl
+
+      # deb8 workaround, new occi-server package will fix it
+      mv /etc/apache2/sites-available/occi-ssl /etc/apache2/sites-available/occi-ssl.conf
+
+      a2enmod occi-ssl
+
+      # rOCCI configuration
+      sed -i 's/\(ROCCI_SERVER_BACKEND[ ]*\).*/\1opennebula/' /etc/apache2/sites-enabled/occi-ssl.conf
+      sed -i 's/\(ROCCI_SERVER_ONE_USER[ ]*\).*/\1oneadmin/' /etc/apache2/sites-enabled/occi-ssl.conf
+      sed -i 's/\(ROCCI_SERVER_ONE_PASSWD[ ]*\).*/\1password/' /etc/apache2/sites-enabled/occi-ssl.conf
+      
+
+      echo "rOCCI installation finish"
+
+
+# sysadmin's master access key
+ssh_authorized_keys:
+- ssh-dss AAAAB3NzaC1kc3MAAACBAJIwhyfTXj6LeaF5adEINIsRawjlYE8vi1rHK9lb3fC0J+58NSL7mRx5zX0r+HPfnyYptciIG9uh0s7RRRu5c6MHPU5L4Vh7CrAT9SkKg7XmdkfNC6k6a6Dpq2hntwEUjxHvaNbuQA+FtiMEYT3M1/RBR6TdvmEFN2FMcHox5L3zAAAAFQC7Uu5YO5vIVRF80LJ2i7TAqYR3FwAAAIB3ioZ1nxwhYatpdIIaLbK8Za+fFzYT3sObea2jzEItGHVK/smyA4CcMw+54clCx726+0DF9nRnoQUWsh0hYGGdo3s5aPMksX+pqE+w0Nv94osVc+3RkixUjPiNnTLWYcZ/o228Du+FpN1o7AtoGYoQgnL/ZDCwyLWJSApdoAJu0AAAAIAIMihuKkNKHPvgVzJNAAtX+10LH7EAA/iY1wBnotLZ+e1doOCOcqnYw/ULJfBYWx9vMle4cPg8o7yioDn/SfO+GUwQNkr2Z1XkmLwmdWVdCeLgbor2hswyZmS7jF8CvdwMHxKD8ve/RrHkyBUkVxiUUnYT8MmInouPGfdmgR5Wow== cloud-support@metacentrum.cz
+
+runcmd:
+- unlink /etc/nologin || /bin/true
+- /var/tmp/INSTALL
+
+
+power_state:
+  mode: reboot
+  message: Initial configuration done by cloud-init, forcing reboot to apply changes.
+
