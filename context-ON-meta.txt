@@ -64,6 +64,11 @@ write_files:
       # change oneadmin's password
       su  oneadmin -c "oneuser passwd oneadmin 'opennebula'"
       echo "oneadmin:opennebula" > /var/lib/one/.one/one_auth
+
+      # create rocci test accounts
+      oneuser create rocci 'roccirocciroccirocciroccirocci' --driver server_cipher
+      oneuser chgrp rocci oneadmin
+      oneuser create roccitest 'roccitestroccitestroccitest'
       #su  oneadmin -c "one restart"
       
       # Install ONe node
