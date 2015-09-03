@@ -1,0 +1,74 @@
+#!/bin/bash
+set -x
+
+echo "ONe installation start"
+     
+# Install ONe server
+#
+wget -q -O- http://downloads.opennebula.org/repo/Debian/repo.key | apt-key add -
+echo "deb http://downloads.opennebula.org/repo/4.14/Debian/8 stable opennebula" > /etc/apt/sources.list.d/opennebula.list
+apt-get update
+apt-get install -y opennebula opennebula-sunstone
+sed -i 's/"kvm" ]/"qemu" ]/' /etc/one/oned.conf
+#/etc/init.d/opennebula restart
+yes | /usr/share/one/install_gems
+
+# enable Sunstone
+sed -i 's/:host:.*/:host: 0.0.0.0/' /etc/one/sunstone-server.conf
+# not needed with power_state: mode: reboot
+#/etc/init.d/opennebula-sunstone restart
+insserv -v opennebula-sunstone
+
+# change oneadmin's password
+su  oneadmin -c "oneuser passwd oneadmin 'opennebula'"
+echo "oneadmin:opennebula" > /var/lib/one/.one/one_auth
+#su  oneadmin -c "one restart"
+
+# Install ONe node
+#
+apt-get install -y opennebula-node qemu qemu-utils libvirt-bin
+/etc/init.d/opennebula restart
+ 
+ 
+# Create ON infrastructure
+
+# Disk
+oneimage create -d default --name ttylinux --path http://opennebula-marketplace.s3.amazonaws.com/ttylinux.img
+oneimage chmod ttylinux 666
+echo -n "Waiting for image to be ready"
+while [ "`oneimage list| grep lock`" ]; do echo -n .; sleep 1; done 
+
+# Network
+cat >>/etc/network/interfaces <<EOF
+auto vbr0
+iface vbr0 inet static
+	address 192.168.0.1
+	netmask 255.255.255.0
+	bridge_ports none
+EOF
+
+#brctl addbr vbr0
+#ifconfig vbr0 up
+
+printf "NAME = example\nTYPE = RANGED\nBRIDGE = vbr0\nNETWORK_SIZE = C\nNETWORK_ADDRESS = 192.168.0.0\nGATEWAY = 192.168.0.1\nDNS = 192.168.0.1\nLOAD_BALANCER = 192.168.0.3\n" > /var/tmp/example.net
+onevnet create /var/tmp/example.net
+onevnet addar example --ip 192.168.0.100 --size 100
+ 
+# Template
+onetemplate create --name "ttylinux" --memory 128 --cpu 1 --disk oneadmin[ttylinux] --nic oneadmin[example]
+onetemplate chmod ttylinux 666
+
+# Host
+su - oneadmin -c "cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys"
+su - oneadmin -c "ssh-keyscan -t ecdsa,rsa $(hostname -f) >> ~/.ssh/known_hosts"
+onehost create $(hostname -f) -i kvm -v kvm -n dummy
+
+
+# Create rocci test accounts
+#
+su - oneadmin -c "oneuser create rocci 'roccirocciroccirocciroccirocci' --driver server_cipher"
+su - oneadmin -c "oneuser chgrp rocci oneadmin"
+su - oneadmin -c "oneuser create roccitest 'roccitestroccitestroccitest'"
+
+echo "ONe installation finish"
+
