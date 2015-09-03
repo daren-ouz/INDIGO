@@ -58,22 +58,32 @@ write_files:
       EOF
 
       apt-get update
-      apt-get install -y occi-server
+      apt-get install -y occi-server curl
 
       if ( ! grep "Listen\s*11443" /etc/apache2/ports.conf); then echo Listen 11443 >> /etc/apache2/ports.conf; fi
 
       a2enmod ssl
+      mkdir /etc/grid-security/
+      cp /etc/ssl/certs/ssl-cert-snakeoil.pem /etc/grid-security/hostcert.pem
+      cp /etc/ssl/private/ssl-cert-snakeoil.key /etc/grid-security/hostkey.pem
+      mkdir /etc/grid-security/certificates
+      cp /etc/ssl/certs/ssl-cert-snakeoil.pem /etc/grid-security/certificates/hostcert.pem
 
       # deb8 workaround, new occi-server package will fix it
       mv /etc/apache2/sites-available/occi-ssl /etc/apache2/sites-available/occi-ssl.conf
 
-      a2enmod occi-ssl
+      a2ensite occi-ssl
+
 
       # rOCCI configuration
       sed -i 's/\(ROCCI_SERVER_BACKEND[ ]*\).*/\1opennebula/' /etc/apache2/sites-enabled/occi-ssl.conf
-      sed -i 's/\(ROCCI_SERVER_ONE_USER[ ]*\).*/\1oneadmin/' /etc/apache2/sites-enabled/occi-ssl.conf
-      sed -i 's/\(ROCCI_SERVER_ONE_PASSWD[ ]*\).*/\1password/' /etc/apache2/sites-enabled/occi-ssl.conf
-      
+      sed -i 's/\(ROCCI_SERVER_ONE_USER[ ]*\).*/\1rocci/' /etc/apache2/sites-enabled/occi-ssl.conf
+      sed -i 's/\(ROCCI_SERVER_ONE_PASSWD[ ]*\).*/\1roccirocciroccirocciroccirocci/' /etc/apache2/sites-enabled/occi-ssl.conf
+      sed -i "s/\(ROCCI_SERVER_HOSTNAME[ ]*\).*/\1`hostname -f`/" /etc/apache2/sites-enabled/occi-ssl.conf
+      sed -i 's@SetEnv ROCCI_SERVER_ONE_XMLRPC  http://localhost:2633/RPC2@SetEnv ROCCI_SERVER_ONE_XMLRPC  http://took22.ics.muni.cz:2633/RPC2@' /etc/apache2/sites-enabled/occi-ssl.conf
+     
+      # deb8 hack
+      sed -i 's/Allow from all/&\n\tRequire all granted/' /etc/apache2/sites-enabled/occi-ssl.conf 
 
       echo "rOCCI installation finish"
 
