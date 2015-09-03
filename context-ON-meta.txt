@@ -64,13 +64,8 @@ write_files:
       # change oneadmin's password
       su  oneadmin -c "oneuser passwd oneadmin 'opennebula'"
       echo "oneadmin:opennebula" > /var/lib/one/.one/one_auth
-
-      # create rocci test accounts
-      oneuser create rocci 'roccirocciroccirocciroccirocci' --driver server_cipher
-      oneuser chgrp rocci oneadmin
-      oneuser create roccitest 'roccitestroccitestroccitest'
       #su  oneadmin -c "one restart"
-      
+
       # Install ONe node
       #
       apt-get install -y opennebula-node qemu qemu-utils libvirt-bin
@@ -109,6 +104,13 @@ write_files:
       su - oneadmin -c "cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys"
       su - oneadmin -c "ssh-keyscan -t ecdsa,rsa $(hostname -f) >> ~/.ssh/known_hosts"
       onehost create $(hostname -f) -i kvm -v kvm -n dummy
+      
+
+      # Create rocci test accounts
+      #
+      su - oneadmin -c "oneuser create rocci 'roccirocciroccirocciroccirocci' --driver server_cipher"
+      su - oneadmin -c "oneuser chgrp rocci oneadmin"
+      su - oneadmin -c "oneuser create roccitest 'roccitestroccitestroccitest'"
       
       echo "ONe installation finish"
 
