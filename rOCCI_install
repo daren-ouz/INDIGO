@@ -1,8 +1,15 @@
+# This is a script for rOOCI sandbox installation.
+# It is supposed to run in Debian 8 environment.
+#
 #!/bin/bash
 set -x
 
+
 echo "rOOCI installation start"
-     
+
+# Set ONe endpoint
+ONE_ENDPOINT=$1
+
 # Get occi-server
 apt-key adv --fetch-keys http://repository.egi.eu/community/keys/APPDBCOMM-DEB-PGP-KEY.asc
 cd /etc/apt/sources.list.d
@@ -38,7 +45,7 @@ sed -i 's/\(ROCCI_SERVER_BACKEND[ ]*\).*/\1opennebula/' /etc/apache2/sites-enabl
 sed -i 's/\(ROCCI_SERVER_ONE_USER[ ]*\).*/\1rocci/' /etc/apache2/sites-enabled/occi-ssl.conf
 sed -i 's/\(ROCCI_SERVER_ONE_PASSWD[ ]*\).*/\1roccirocciroccirocciroccirocci/' /etc/apache2/sites-enabled/occi-ssl.conf
 sed -i "s/\(ROCCI_SERVER_HOSTNAME[ ]*\).*/\1`hostname -f`/" /etc/apache2/sites-enabled/occi-ssl.conf
-sed -i 's@SetEnv ROCCI_SERVER_ONE_XMLRPC  http://localhost:2633/RPC2@SetEnv ROCCI_SERVER_ONE_XMLRPC  http://took22.ics.muni.cz:2633/RPC2@' /etc/apache2/sites-enabled/occi-ssl.conf
+sed -i #s@SetEnv ROCCI_SERVER_ONE_XMLRPC  http://localhost:2633/RPC2@SetEnv ROCCI_SERVER_ONE_XMLRPC  http://${ONE_ENDPOINT}:2633/RPC2@" /etc/apache2/sites-enabled/occi-ssl.conf
      
 # deb8 hack
 sed -i 's/Allow from all/&\n\tRequire all granted/' /etc/apache2/sites-enabled/occi-ssl.conf 

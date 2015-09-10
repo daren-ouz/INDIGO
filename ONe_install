@@ -1,8 +1,13 @@
+# This is a script for ONe sandbox installation with support for rOCCI cooperation. 
+# It is supposed to run in Debian 8 environment.
+#
 #!/bin/bash
-set -x
 
+set -x
 echo "ONe installation start"
-     
+
+
+####################
 # Install ONe server
 #
 wget -q -O- http://downloads.opennebula.org/repo/Debian/repo.key | apt-key add -
@@ -10,26 +15,24 @@ echo "deb http://downloads.opennebula.org/repo/4.14/Debian/8 stable opennebula" 
 apt-get update
 apt-get install -y opennebula opennebula-sunstone
 sed -i 's/"kvm" ]/"qemu" ]/' /etc/one/oned.conf
-#/etc/init.d/opennebula restart
 yes | /usr/share/one/install_gems
 
 # enable Sunstone
 sed -i 's/:host:.*/:host: 0.0.0.0/' /etc/one/sunstone-server.conf
-# not needed with power_state: mode: reboot
-#/etc/init.d/opennebula-sunstone restart
+/etc/init.d/opennebula-sunstone restart
 insserv -v opennebula-sunstone
 
 # change oneadmin's password
 su  oneadmin -c "oneuser passwd oneadmin 'opennebula'"
 echo "oneadmin:opennebula" > /var/lib/one/.one/one_auth
-#su  oneadmin -c "one restart"
 
+
+##################
 # Install ONe node
 #
 apt-get install -y opennebula-node qemu qemu-utils libvirt-bin
 /etc/init.d/opennebula restart
- 
- 
+  
 # Create ON infrastructure
 
 # Disk
@@ -46,9 +49,6 @@ iface vbr0 inet static
 	netmask 255.255.255.0
 	bridge_ports none
 EOF
-
-#brctl addbr vbr0
-#ifconfig vbr0 up
 
 printf "NAME = example\nTYPE = RANGED\nBRIDGE = vbr0\nNETWORK_SIZE = C\nNETWORK_ADDRESS = 192.168.0.0\nGATEWAY = 192.168.0.1\nDNS = 192.168.0.1\nLOAD_BALANCER = 192.168.0.3\n" > /var/tmp/example.net
 onevnet create /var/tmp/example.net
@@ -70,5 +70,6 @@ su - oneadmin -c "oneuser create rocci 'roccirocciroccirocciroccirocci' --driver
 su - oneadmin -c "oneuser chgrp rocci oneadmin"
 su - oneadmin -c "oneuser create roccitest 'roccitestroccitestroccitest'"
 
-echo "ONe installation finish"
+
+echo "ONe installation finished"
 
