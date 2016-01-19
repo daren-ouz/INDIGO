@@ -1,0 +1,32 @@
+# This is a script for ONe FedCloud installation.
+# It is supposed to run in CentOS envirnment.
+#
+#!/bin/bash
+
+set -x
+echo "ONe installation start"
+
+
+# Dissable SELinux
+sed -i 's/^SELINUX=.*/SELINUX=disabled/' /etc/sysconfig/selinux
+setenforce 0
+
+# Install repo
+yum install epel-release
+cat << EOT > /etc/yum.repos.d/opennebula.repo
+[opennebula]
+name=opennebula
+baseurl=http://downloads.opennebula.org/repo/4.14/CentOS/7/x86_64/
+enabled=1
+gpgcheck=0
+EOT
+
+# Install packages
+yum install -y opennebula-server opennebula-sunstone
+echo "1
+
+" | /usr/share/one/install_gems
+
+
+echo "ONe installation finished"
+
