@@ -23,6 +23,7 @@ EOT
 
 # Install packages
 yum install -y opennebula-server opennebula-sunstone
+yum -y install gcc mysql-devel ruby-devel rubygems libcurl-devel gcc-c++ sqlite-devel
 echo "1
 
 " | /usr/share/one/install_gems
