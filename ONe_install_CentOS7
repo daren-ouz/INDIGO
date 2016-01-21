@@ -28,6 +28,37 @@ echo "1
 
 " | /usr/share/one/install_gems
 
+# Configure Sunstone
+sed -i 's/:host: 127.0.0.1/:host: 0.0.0.0/' /etc/one/sunstone-server.conf
+
+# Enable/run ONe & Sunstone
+# XXX: open just required ports, i.e. 9869 for sunstone
+systemctl stop firewalld
+systemctl disable firewalld
+
+systemctl enable opennebula
+systemctl start opennebula
+systemctl enable opennebula-sunstone
+systemctl start opennebula-sunstone
+
+# change oneadmin's password
+su  oneadmin -c "oneuser passwd oneadmin 'opennebula'"
+echo "oneadmin:opennebula" > /var/lib/one/.one/one_auth
+
+# Configure SSH Public Key
+su  oneadmin -c 'cat << EOT > ~/.ssh/config
+Host *
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+EOT
+
+
+# Install ONe none
+yum install -y opennebula-node-kvm
+
+
+
+chmod 600 ~/.ssh/config'
 
 echo "ONe installation finished"
 
