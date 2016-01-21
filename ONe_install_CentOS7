@@ -75,28 +75,11 @@ while [ "`oneimage list| grep lock`" ]; do echo -n .; sleep 1; done
 
 # Network
 
-cat  << EOF > /etc/sysconfig/network-scripts/ifcfg-br0
-DEVICE=br0
-TYPE=Bridge
-ONBOOT=yes
-BOOTPROTO=dhcp
-NM_CONTROLLED=no
-EOF
+NET=`ip addr  show virbr0| grep inet| awk '{print $2}'| sed 's/\.[^\.]*$//'`
 
-cat  << EOF > /etc/sysconfig/network-scripts/ifcfg-eth0
-DEVICE=eth0
-BOOTPROTO=none
-NM_CONTROLLED=no
-ONBOOT=yes
-TYPE=Ethernet
-BRIDGE=br0
-EOT
-
-systemctl restart network.service
-
-printf "NAME = example\nTYPE = RANGED\nBRIDGE = br0\nNETWORK_SIZE = C\nNETWORK_ADDRESS = 192.168.0.0\nGATEWAY = 192.168.0.1\nDNS = 192.168.0.1\nLOAD_BALANCER = 192.168.0.3\n" > /var/tmp/example.net
+printf "NAME = example\nTYPE = RANGED\nBRIDGE = virbr0\nNETWORK_SIZE = C\nNETWORK_ADDRESS = $NET.0\nGATEWAY = $NET.1\nDNS = $NET.1\nLOAD_BALANCER = $NET.3\n" > /var/tmp/example.net
 onevnet create /var/tmp/example.net
-onevnet addar example --ip 192.168.0.100 --size 100
+onevnet addar example --ip $NET.100 --size 100
 
 # Template
 onetemplate create --name "ttylinux" --memory 128 --cpu 1 --disk oneadmin[ttylinux] --nic oneadmin[example]
