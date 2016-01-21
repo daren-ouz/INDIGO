@@ -82,7 +82,7 @@ onevnet create /var/tmp/example.net
 onevnet addar example --ip $NET.100 --size 100
 
 # Template
-onetemplate create --name "ttylinux" --memory 128 --cpu 1 --disk oneadmin[ttylinux] --nic oneadmin[example]
+onetemplate create --name "ttylinux" --memory 128 --cpu 1 --disk oneadmin[ttylinux] --nic oneadmin[example] --vnc --vnc-password meta --vnc-listen 0.0.0.0
 onetemplate chmod ttylinux 666
 
 # Host
