@@ -6,12 +6,14 @@
 set -x
 echo "ONe installation start"
 
+# Install Server
+#
 
 # Dissable SELinux
 sed -i 's/^SELINUX=.*/SELINUX=disabled/' /etc/sysconfig/selinux
 setenforce 0
 
-# Install repo
+# Add repo
 yum install epel-release
 cat << EOT > /etc/yum.repos.d/opennebula.repo
 [opennebula]
@@ -56,11 +58,10 @@ EOT
 chmod 600 ~/.ssh/config'
 
 
-# Install ONe none
-yum install -y opennebula-node-kvm
+# Install ONe node
+#
 
-#systemctl enable messagebus.service
-#systemctl start messagebus.service
+yum install -y opennebula-node-kvm
 systemctl enable libvirtd.service
 systemctl start libvirtd.service
 
@@ -68,15 +69,12 @@ systemctl start libvirtd.service
 
 # Disk
 oneimage create -d default --name ttylinux --path http://marketplace.c12g.com/appliance/4fc76a938fb81d3517000003/download/0
-#oneimage create -d default --name ttylinux --path http://opennebula-marketplace.s3.amazonaws.com/ttylinux.img
 oneimage chmod ttylinux 666
 echo -n "Waiting for image to be ready"
 while [ "`oneimage list| grep lock`" ]; do echo -n .; sleep 1; done
 
 # Network
-
 NET=`ip addr  show virbr0| grep inet| awk '{print $2}'| sed 's/\.[^\.]*$//'`
-
 printf "NAME = example\nTYPE = RANGED\nBRIDGE = virbr0\nNETWORK_SIZE = C\nNETWORK_ADDRESS = $NET.0\nGATEWAY = $NET.1\nDNS = $NET.1\nLOAD_BALANCER = $NET.3\n" > /var/tmp/example.net
 onevnet create /var/tmp/example.net
 onevnet addar example --ip $NET.100 --size 100
@@ -91,6 +89,44 @@ su - oneadmin -c "ssh-keyscan -t ecdsa,rsa,dsa $(hostname -f) >> ~/.ssh/known_ho
 onehost create $(hostname -f) -i kvm -v kvm -n dummy
 
 
-
 echo "ONe installation finished"
+#####################################################################
+
+echo "rOCCI installation starts"
+
+# get passenger RPMs
+curl --fail -sSLo /etc/yum.repos.d/passenger.repo https://oss-binaries.phusionpassenger.com/yum/definitions/el-passenger.repo
+#yum install -y mod_passenger
+yum install -y yum-plugin-priorities
+
+
+#cd /etc/yum.repos.d
+#wget http://repository.egi.eu/community/software/rocci.server/1.1.x/releases/repofiles/sl-6-x86_64.repo
+# XXX: get sl7 version of RPM
+yum install -y occi-server
+
+if ( ! grep "Listen\s*11443" /etc/httpd/conf/httpd.conf); then \
+echo Listen 11443 >> /etc/httpd/conf/httpd.conf; fi
+
+mkdir /etc/grid-security/
+cp /etc/ssl/certs/localhost.crt /etc/grid-security/hostcert.pem
+cp /etc/ssl/certs/../private/localhost.key /etc/grid-security/hostkey.pem
+mkdir /etc/grid-security/certificates
+cp /etc/ssl/certs/localhost.crt /etc/grid-security/certificates/hostcert.pem
+
+# rOCCI configuration
+sed -i 's/\(ROCCI_SERVER_BACKEND[ ]*\).*/\1opennebula/' /etc/httpd/conf.d/occi-ssl.conf
+sed -i 's/\(ROCCI_SERVER_ONE_USER[ ]*\).*/\1rocci/' /etc/httpd/conf.d/occi-ssl.conf
+sed -i 's/\(ROCCI_SERVER_ONE_PASSWD[ ]*\).*/\1roccirocciroccirocciroccirocci/' /etc/httpd/conf.d/occi-ssl.conf
+sed -i "s/\(ROCCI_SERVER_HOSTNAME[ ]*\).*/\1`hostname -f`/" /etc/httpd/conf.d/occi-ssl.conf
+sed -i "s@SetEnv ROCCI_SERVER_ONE_XMLRPC  http://localhost:2633/RPC2@SetEnv ROCCI_SERVER_ONE_XMLRPC  http://${ONE_ENDPOINT}:2633/RPC2@" /etc/httpd/conf.d/occi-ssl.conf
+
+sed -i 's/Allow from all/&\n\tRequire all granted/' /etc/httpd/conf.d/occi-ssl.conf
+
+systemctl enable httpd
+systemctl start httpd
+
+# waiting for new RPMs...
+echo "rOCCI installation finished"
+#####################################################################
 
