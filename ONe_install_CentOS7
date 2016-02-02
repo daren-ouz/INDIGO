@@ -123,10 +123,10 @@ sed -i "s@SetEnv ROCCI_SERVER_ONE_XMLRPC  http://localhost:2633/RPC2@SetEnv ROCC
 
 sed -i 's/Allow from all/&\n\tRequire all granted/' /etc/httpd/conf.d/occi-ssl.conf
 
-systemctl enable httpd
-systemctl start httpd
+systemctl enable httpd.service
+systemctl start httpd.service
+systemctl restart  memcached.service
 
-# waiting for new RPMs...
 echo "rOCCI installation finished"
 #####################################################################
 
