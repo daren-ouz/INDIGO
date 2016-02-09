@@ -129,6 +129,28 @@ sed -i "s/\(ROCCI_SERVER_HOSTNAME[ ]*\).*/\1`hostname -f`/" /etc/httpd/conf.d/oc
 
 sed -i 's/Allow from all/&\n\tRequire all granted/' /etc/httpd/conf.d/occi-ssl.conf
 
+# install and configure gridsite
+yum install -y gridsite
+
+sed -i 's/#  GridSiteEnvs on/GridSiteEnvs on/' /etc/httpd/conf.d/occi-ssl.conf
+sed -i 's/#  GridSiteIndexes off/GridSiteIndexes off/' /etc/httpd/conf.d/occi-ssl.conf
+sed -i 's/#  GridSiteGSIProxyLimit 4/GridSiteGSIProxyLimit 4/' /etc/httpd/conf.d/occi-ssl.conf
+sed -i 's/#  GridSiteMethods ""/GridSiteMethods ""/' /etc/httpd/conf.d/occi-ssl.conf
+sed -i 's/\([ ]*SSLVerifyClient\).*/\1 require/' /etc/httpd/conf.d/occi-ssl.conf
+sed -i 's/\([ ]*SSLOptions\).*/\1 +StdEnvVars +ExportCertData/' /etc/httpd/conf.d/occi-ssl.conf
+
+mkdir -p /etc/grid-security/vomsdir/fedcloud.egi.eu
+
+cat > /etc/grid-security/vomsdir/fedcloud.egi.eu/voms1.egee.cesnet.cz.lsc << EOF
+/DC=org/DC=terena/DC=tcs/OU=Domain Control Validated/CN=voms1.egee.cesnet.cz
+/C=NL/O=TERENA/CN=TERENA eScience SSL CA
+EOF
+
+cat > /etc/grid-security/vomsdir/fedcloud.egi.eu/voms2.grid.cesnet.cz.lsc << EOF
+/DC=org/DC=terena/DC=tcs/OU=Domain Control Validated/CN=voms2.grid.cesnet.cz
+/C=NL/O=TERENA/CN=TERENA eScience SSL CA
+EOF
+
 systemctl enable httpd.service
 systemctl start httpd.service
 systemctl restart  memcached.service
@@ -136,3 +158,17 @@ systemctl restart  memcached.service
 echo "rOCCI installation finished"
 #####################################################################
 
+#####################################################################
+echo "Perun installation starts"
+
+echo 'from="perun.ics.muni.cz",command="/opt/perun/bin/perun" ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC26+QiDtZ3bnLiLllySgsImSPUX0/sFBmo//3PmqOsuJIBdWB5BLU5Ws+pTRxefqC8SHfI92ZQoGXe7aJniTXxbRPa0FZJ3fskAHwpbiJfstGVZ1hddBcHIvial3v5Rd++zRiKslDVTkXLlb+b1pTnjyTVbD/6kGILgnUz7RKY5DnXADVnmTdPliQCabhE41AhkWdcuWpHBNwvxONKoZJJpbuouDbcviX4lJu9TF9Ij62rZjcoNzg5/JiIKTcMVi8L04FTjyCMxKRzlo00IjSuapFnXQNNZUL5u/mfPA/HpyIkSAOiPXLhWy9UuBNo7xdrCmfTh1qUvzbuWXJZN3d9 perunv3@perun.ics.muni.cz' >>~oneadmin/.ssh/authorized_keys
+
+yum install -y perl-XML-XPath
+
+cd /tmp
+git clone https://github.com/EGI-FCTF/fctf-perun
+mkdir -p /opt/perun/bin
+cd /opt/perun/bin
+cp -r /tmp/fctf-perun/* /opt/perun/bin
+
+onegroup create -n fedcloud.egi.eu
