@@ -132,16 +132,16 @@ sed -i "s/localhost.localdomain/`hostname -f`/" make-dummy-cert
 ./make-dummy-cert localhost.crt
 ./renew-dummy-cert localhost.crt
 split -b `grep "^$" -b localhost.crt |sed 's/://'` localhost.crt CERT
+mkdir -p /etc/grid-security/certificates
 cp  /etc/ssl/certs/CERTab /etc/grid-security/hostcert.pem
 cp  /etc/ssl/certs/CERTaa /etc/grid-security/hostkey.pem
-mkdir /etc/grid-security/certificates
 cp  /etc/ssl/certs/CERTab /etc/grid-security/certificates/hostcert.pem
 #cp  /etc/ssl/certs/CERTab /etc/pki/ca-trust/source/anchors/hostcert.pem
 #update-ca-trust extract
 
 # On client
 # put CA cert to /usr/local/share/ca-certificates/hostcert.crt 
-# run update-ca-certificates -vf
+# run update-ca-certificates -f
 # copy certificate and hash symlinks from /etc/ssl/certs to /etc/grid-security/certificates
 
 
