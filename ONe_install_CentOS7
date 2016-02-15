@@ -123,6 +123,28 @@ echo Listen 11443 >> /etc/httpd/conf/httpd.conf; fi
 #mkdir /etc/grid-security/certificates
 #cp /etc/ssl/certs/localhost.crt /etc/grid-security/certificates/hostcert.pem
 
+# generete self-signed server certificate
+# XXX: TODO
+unalias -a
+cd /etc/ssl/certs/
+mv localhost.crt localhost.crt.orig
+sed -i "s/localhost.localdomain/`hostname -f`/" make-dummy-cert
+./make-dummy-cert localhost.crt
+./renew-dummy-cert localhost.crt
+split -b `grep "^$" -b localhost.crt |sed 's/://'` localhost.crt CERT
+cp  /etc/ssl/certs/CERTab /etc/grid-security/hostcert.pem
+cp  /etc/ssl/certs/CERTaa /etc/grid-security/hostkey.pem
+mkdir /etc/grid-security/certificates
+cp  /etc/ssl/certs/CERTab /etc/grid-security/certificates/hostcert.pem
+#cp  /etc/ssl/certs/CERTab /etc/pki/ca-trust/source/anchors/hostcert.pem
+#update-ca-trust extract
+
+# On client
+# put CA cert to /usr/local/share/ca-certificates/hostcert.crt 
+# run update-ca-certificates -vf
+# copy certificate and hash symlinks from /etc/ssl/certs to /etc/grid-security/certificates
+
+
 # rOCCI configuration
 sed -i 's/\(ROCCI_SERVER_BACKEND[ ]*\).*/\1opennebula/' /etc/httpd/conf.d/occi-ssl.conf
 sed -i 's/\(ROCCI_SERVER_ONE_USER[ ]*\).*/\1rocci/' /etc/httpd/conf.d/occi-ssl.conf
@@ -164,20 +186,6 @@ enabled=1
 EOT
 yum install -y ca-policy-egi-core
 
-# generete self-signed server certificate
-# XXX: TODO
-cd /etc/ssl/certs/
-mv localhost.crt localhost.crt.orig
-sed -i "s/localhost.localdomain/`hostname -f`/" make-dummy-cert
-./make-dummy-cert local.crt
-./renew-dummy-cert local.crt
-split -b `grep "^$" -b localhost.crt |sed 's/://'` localhost.crt CERT
-cp -n /etc/ssl/certs/CERTab /etc/grid-security/hostcert.pem
-cp -n /etc/ssl/certs/CERTaa /etc/grid-security/hostkey.pem
-mkdir /etc/grid-security/certificates
-cp -n /etc/ssl/certs/CERTab /etc/grid-security/certificates/hostcert.pem
-#cp -n /etc/ssl/certs/CERTab /etc/pki/ca-trust/source/anchors/hostcert.pem
-#update-ca-trust extract
 
 
 systemctl enable httpd.service
