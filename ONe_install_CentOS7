@@ -117,14 +117,8 @@ yum install -y occi-server-1.1.7+20160201214854-1.el7.x86_64.rpm
 if ( ! grep "Listen\s*11443" /etc/httpd/conf/httpd.conf); then \
 echo Listen 11443 >> /etc/httpd/conf/httpd.conf; fi
 
-#mkdir /etc/grid-security/
-#cp /etc/ssl/certs/localhost.crt /etc/grid-security/hostcert.pem
-#cp /etc/ssl/certs/../private/localhost.key /etc/grid-security/hostkey.pem
-#mkdir /etc/grid-security/certificates
-#cp /etc/ssl/certs/localhost.crt /etc/grid-security/certificates/hostcert.pem
 
-# generete self-signed server certificate
-# XXX: TODO
+# generate self-signed server certificate
 unalias -a
 cd /etc/ssl/certs/
 mv localhost.crt localhost.crt.orig
@@ -136,11 +130,10 @@ mkdir -p /etc/grid-security/certificates
 cp  /etc/ssl/certs/CERTab /etc/grid-security/hostcert.pem
 cp  /etc/ssl/certs/CERTaa /etc/grid-security/hostkey.pem
 cp  /etc/ssl/certs/CERTab /etc/grid-security/certificates/hostcert.pem
-#cp  /etc/ssl/certs/CERTab /etc/pki/ca-trust/source/anchors/hostcert.pem
-#update-ca-trust extract
 
-# On client
-# put CA cert to /usr/local/share/ca-certificates/hostcert.crt 
+# On OCCI client:
+# put rOCCI server cert to /usr/local/share/ca-certificates/hostcert.crt 
+# clear old certs&hashes if necessary
 # run update-ca-certificates -f
 # copy certificate and hash symlinks from /etc/ssl/certs to /etc/grid-security/certificates
 
@@ -186,8 +179,6 @@ enabled=1
 EOT
 yum install -y ca-policy-egi-core
 
-
-
 systemctl enable httpd.service
 systemctl start httpd.service
 systemctl restart  memcached.service
@@ -212,3 +203,38 @@ cd /opt/perun/bin
 cp -r /tmp/fctf-perun/* /opt/perun/bin
 
 onegroup create -n fedcloud.egi.eu
+
+echo "Perun installation finished"
+#####################################################################
+
+
+#####################################################################
+echo "Oneacct-export installation starts"
+
+cd /etc/yum.repos.d
+wget -O oneacct-export.repo http://repository.egi.eu/community/software/oneacct.export/0.2.x/releases/repofiles/sl-6-x86_64.repo
+
+yum install -y oneacct-export
+
+sed -i "s/site_name: Undefined/site_name: Cesnet\'s Indigo FedCloud applience/" /etc/oneacct-export/conf.yml
+systemctl enable redis
+systemctl start redis
+systemctl enable oneacct-export-cron
+systemctl start oneacct-export-cron
+sed -i 's/^Defaults[ ]*requiretty/#Defaults    requiretty/' /etc/sudoers
+systemctl enable oneacct-export-sidekiq
+systemctl start oneacct-export-sidekiq
+
+cd /tmp
+wget https://github.com/apel/ssm/releases/download/2.1.7-1/apel-ssm-2.1.7-1.el6.noarch.rpm
+wget https://github.com/apel/apel/releases/download/1.5.1-1/apel-lib-1.5.1-1.el6.noarch.rpm
+wget https://github.com/apel/apel/releases/download/1.5.1-1/apel-client-1.5.1-1.el6.noarch.rpm
+yum -y install apel-client-1.5.1-1.el6.noarch.rpm apel-lib-1.5.1-1.el6.noarch.rpm apel-ssm-2.1.7-1.el6.noarch.rpm
+
+touch /etc/oneacct-export/compat.one
+echo oneadmin >/etc/oneacct-export/groups.exclude
+
+
+echo "Oneacct-export installation finished"
+#####################################################################
+
