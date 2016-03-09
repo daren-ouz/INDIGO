@@ -23,7 +23,7 @@ Supposed to be run via cloudinit as:
 
 runcmd:
 - cd /var/tmp
-- wget https://raw.githubusercontent.com/daren-ouz/metacloud-devstack-deb8-context/master/ONe_install
+- wget https://raw.githubusercontent.com/daren-ouz/metacloud-devstack-deb8-context/master/rOCCI_install
 - bash /var/tmp/rOCCI_install HERE_PUT_ONe_HOSTNAME
 
 power_state:
