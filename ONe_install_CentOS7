@@ -238,3 +238,12 @@ echo oneadmin >/etc/oneacct-export/groups.exclude
 echo "Oneacct-export installation finished"
 #####################################################################
 
+
+#####################################################################
+
+# install Docker
+
+#curl -fsSL https://get.docker.com/ | sh
+#systemctl enable docker
+#systemctl start docker
+
