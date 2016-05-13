@@ -225,6 +225,8 @@ sed -i 's/^Defaults[ ]*requiretty/#Defaults    requiretty/' /etc/sudoers
 systemctl enable oneacct-export-sidekiq
 systemctl start oneacct-export-sidekiq
 
+# TODO: waiting for CentOS 7 version of APEL
+# GGUS #119768
 cd /tmp
 wget https://github.com/apel/ssm/releases/download/2.1.7-1/apel-ssm-2.1.7-1.el6.noarch.rpm
 wget https://github.com/apel/apel/releases/download/1.5.1-1/apel-lib-1.5.1-1.el6.noarch.rpm
@@ -236,6 +238,20 @@ echo oneadmin >/etc/oneacct-export/groups.exclude
 
 
 echo "Oneacct-export installation finished"
+#####################################################################
+
+
+#####################################################################
+echo "BDII + cloud info provider installation starts"
+
+yum install -y bdii
+
+# TODO: waiting for CentOS 7 version of cloud-info-provider-service
+# GGUS #119768
+#yum install -y cloud-info-provider-service
+
+
+echo "BDII + cloud info provider installation finished"
 #####################################################################
 
 
