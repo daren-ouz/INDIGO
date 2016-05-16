@@ -227,11 +227,14 @@ systemctl start oneacct-export-sidekiq
 
 # TODO: waiting for CentOS 7 version of APEL
 # GGUS #119768
-cd /tmp
-wget https://github.com/apel/ssm/releases/download/2.1.7-1/apel-ssm-2.1.7-1.el6.noarch.rpm
-wget https://github.com/apel/apel/releases/download/1.5.1-1/apel-lib-1.5.1-1.el6.noarch.rpm
-wget https://github.com/apel/apel/releases/download/1.5.1-1/apel-client-1.5.1-1.el6.noarch.rpm
-yum -y install apel-client-1.5.1-1.el6.noarch.rpm apel-lib-1.5.1-1.el6.noarch.rpm apel-ssm-2.1.7-1.el6.noarch.rpm
+#yum -y install apel-client
+
+wget http://home.zcu.cz/~mulac/indigo/apel-ssm-2.1.7-1.el7.centos.noarch.rpm
+wget http://home.zcu.cz/~mulac/indigo/apel-lib-1.5.1-1.el7.centos.noarch.rpm
+wget http://home.zcu.cz/~mulac/indigo/apel-client-1.5.1-1.el7.centos.noarch.rpm
+#wget http://home.zcu.cz/~mulac/indigo/apel-parsers-1.5.1-1.el7.centos.noarch.rpm
+#wget http://home.zcu.cz/~mulac/indigo/apel-server-1.5.1-1.el7.centos.noarch.rpm
+yum install -y apel-client-1.5.1-1.el7.centos.noarch.rpm apel-ssm-2.1.7-1.el7.centos.noarch.rpm apel-lib-1.5.1-1.el7.centos.noarch.rpm
 
 touch /etc/oneacct-export/compat.one
 echo oneadmin >/etc/oneacct-export/groups.exclude
