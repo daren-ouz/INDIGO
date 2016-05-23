@@ -14,7 +14,7 @@ sed -i 's/^SELINUX=.*/SELINUX=disabled/' /etc/sysconfig/selinux
 setenforce 0
 
 # Add repo
-yum install epel-release
+yum install -y epel-release
 cat << EOT > /etc/yum.repos.d/opennebula.repo
 [opennebula]
 name=opennebula
@@ -259,6 +259,7 @@ echo "BDII + cloud info provider installation finished"
 
 
 #####################################################################
+# Install ONEDock
 
 # install Docker
 
@@ -266,3 +267,69 @@ echo "BDII + cloud info provider installation finished"
 #systemctl enable docker
 #systemctl start docker
 
+#yum install -y docker-registry
+#systemctl enable docker-registry.service
+#service docker-registry start
+
+##reusing certificate generated for rOCCI
+#mkdir -p /etc/docker/certs.d/$HOSTNAME:5000/
+#cp /etc/ssl/certs/localhost.crt /etc/docker/certs.d/$HOSTNAME\:5000/
+#cp /etc/ssl/certs/localhost.crt /etc/pki/ca-trust/source/anchors/
+#update-ca-trust extract
+#service docker restart
+
+#sed -i 's/data/images/' /var/lib/one/remotes/onedock.conf
+
+#yum -y install jq xmlstarlet
+
+#cd /tmp/
+#git clone https://github.com/indigo-dc/onedock
+#cd onedock
+#yes| ./setup_files.sh
+
+#cat >> /etc/one/oned.conf << EOF
+#IM_MAD = [
+#      name       = "onedock",
+#      executable = "one_im_ssh",
+#      arguments  = "-r 3 -t 15 onedock" ]
+#
+#VM_MAD = [
+#    name       = "onedock",
+#    executable = "one_vmm_exec",
+#    arguments  = "-t 15 -r 0 onedock",
+#    type       = "xml" ]
+#
+#TM_MAD_CONF = [
+#    name = "onedock", ln_target = "SYSTEM", clone_target = "SYSTEM", shared = "yes"
+#]
+#EOF
+
+#sed -i 's/arguments = "-t 15 -d dummy,lvm,shared,fs_lvm,qcow2,ssh,vmfs,ceph,dev"/arguments = "-t 15 -d dummy,lvm,shared,fs_lvm,qcow2,ssh,vmfs,ceph,dev,onedock"/' /etc/one/oned.conf
+#sed -i 's/arguments  = "-t 15 -d dummy,fs,vmfs,lvm,ceph,dev"/arguments  = "-t 15 -d dummy,fs,vmfs,lvm,ceph,dev,onedock"/' /etc/one/oned.conf
+
+
+# XXX: use /var/lib/one/remote/docker-manage-network (wiki says /var/tmp/one/docker-manage-network)
+# XXX: add /usr/sbin/losetup ??
+#sed 's!oneadmin ALL=(ALL) NOPASSWD: ONE_MISC, ONE_NET, ONE_LVM, ONE_ISCSI, ONE_OVS, ONE_XEN!Cmnd_Alias ONEDOCK = /var/lib/one/remotes/docker-manage-network, /usr/bin/qemu-nbd\n\noneadmin ALL=(ALL) NOPASSWD: ONE_MISC, ONE_NET, ONE_LVM, ONE_ISCSI, ONE_OVS, ONE_XEN, ONEDOCK!'  /etc/sudoers.d/opennebula 
+#usermod -aG docker oneadmin
+
+#sed -i 's!^SCRIPTS_REMOTE_DIR=.*!SCRIPTS_REMOTE_DIR=/var/lib/one/remotes!'  /etc/one/oned.conf
+
+# XXX: image->image template->DOCKERRUN="/usr/sbin/sshd -D"
+
+#cat > /tmp/coker.conf << EOF
+#strict-order
+#pid-file=/var/run/libvirt/network/docker.pid
+#except-interface=lo
+#bind-dynamic
+#interface=docker0
+#dhcp-range=172.17.10.1,172.17.10.100
+#dhcp-no-override
+#dhcp-lease-max=253
+#dhcp-hostsfile=/var/lib/libvirt/dnsmasq/docker.hostsfile
+#addn-hosts=/var/lib/libvirt/dnsmasq/docker.addnhosts
+#EOF
+
+#/sbin/dnsmasq --conf-file=/tmp/docker.conf --leasefile-ro 
+
+#systemctl restart opennebula
