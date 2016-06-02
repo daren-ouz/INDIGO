@@ -6,6 +6,18 @@
 #!/bin/bash
 
 set -x
+
+echo "General setup start"
+
+# several commands bellow need resolvation
+if [ ! "`grep 127.0.0.1 /etc/hosts|grep $HOSTNAME`" ]; 
+then 
+	echo "127.0.0.1 $HOSTNAME `hostname -s`"; 
+fi
+
+echo "General setup finished"
+
+
 echo "ONe installation start"
 
 # Install Server
@@ -87,8 +99,8 @@ onetemplate chmod ttylinux 666
 
 # Host
 su - oneadmin -c "cat ~/.ssh/id_dsa.pub >> ~/.ssh/authorized_keys"
-su - oneadmin -c "ssh-keyscan -t ecdsa,rsa,dsa $(hostname -f) >> ~/.ssh/known_hosts"
-onehost create $(hostname -f) -i kvm -v kvm -n dummy
+su - oneadmin -c "ssh-keyscan -t ecdsa,rsa,dsa $HOSTNAME >> ~/.ssh/known_hosts"
+onehost create $HOSTNAME -i kvm -v kvm -n dummy
 
 # Create rocci test accounts
 #
@@ -124,7 +136,7 @@ echo Listen 11443 >> /etc/httpd/conf/httpd.conf; fi
 unalias -a
 cd /etc/ssl/certs/
 mv localhost.crt localhost.crt.orig
-sed -i "s/localhost.localdomain/`hostname -f`/" make-dummy-cert
+sed -i "s/localhost.localdomain/$HOSTNAME/" make-dummy-cert
 ./make-dummy-cert localhost.crt
 ./renew-dummy-cert localhost.crt
 split -b `grep "^$" -b localhost.crt |sed 's/://'` localhost.crt CERT
@@ -343,21 +355,21 @@ usermod -aG docker oneadmin
 sed -i 's!^SCRIPTS_REMOTE_DIR=.*!SCRIPTS_REMOTE_DIR=/var/lib/one/remotes!'  /etc/one/oned.conf
 
 # Start DHCPD for docker containers
-cat > /etc/dnsmasq.d/doker.conf << EOF
-strict-order
-pid-file=/var/run/libvirt/network/docker.pid
-except-interface=lo
-bind-dynamic
-interface=docker0
-dhcp-range=172.17.10.1,172.17.10.100
-dhcp-no-override
-dhcp-lease-max=253
-dhcp-hostsfile=/var/lib/libvirt/dnsmasq/docker.hostsfile
-addn-hosts=/var/lib/libvirt/dnsmasq/docker.addnhosts
-EOF
+#cat > /etc/dnsmasq.d/doker.conf << EOF
+#strict-order
+#pid-file=/var/run/libvirt/network/docker.pid
+#except-interface=lo
+#bind-dynamic
+#interface=docker0
+#dhcp-range=172.17.10.1,172.17.10.100
+#dhcp-no-override
+#dhcp-lease-max=253
+#dhcp-hostsfile=/var/lib/libvirt/dnsmasq/docker.hostsfile
+#addn-hosts=/var/lib/libvirt/dnsmasq/docker.addnhosts
+#EOF
 
-systemctl enable dnsmasq
-systemctl start dnsmasq
+#systemctl enable dnsmasq
+#systemctl start dnsmasq
 
 systemctl restart opennebula
 
