@@ -12,7 +12,7 @@ echo "General setup start"
 # several commands bellow need resolvation
 if [ ! "`grep 127.0.0.1 /etc/hosts|grep $HOSTNAME`" ]; 
 then 
-	echo "127.0.0.1 $HOSTNAME `hostname -s`"; 
+	echo "127.0.0.1 $HOSTNAME `hostname -s`" >>/etc/hosts; 
 fi
 
 echo "General setup finished"
@@ -130,6 +130,7 @@ yum install -y occi-server-1.1.7+20160201214854-1.el7.x86_64.rpm
 
 if ( ! grep "Listen\s*11443" /etc/httpd/conf/httpd.conf); then \
 echo Listen 11443 >> /etc/httpd/conf/httpd.conf; fi
+mv /etc/httpd/conf.d/ssl.conf /etc/httpd/conf.d/ssl.conf_not_used
 
 
 # generate self-signed server certificate
