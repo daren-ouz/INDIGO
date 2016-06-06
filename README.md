@@ -47,3 +47,22 @@ runcmd:
 
 power_state:
 - mode: reboot
+
+
+FedCloud_install
+----------------
+
+FedCloud applience on CentOS 7. 
+
+- supports    : ONe, rOCCI, Perun, oneacct and BDII
+- in progress : vmcatcher
+
+Supposed to be run via cloudinit as:
+
+runcmd:
+- cd /var/tmp
+- wget https://raw.githubusercontent.com/daren-ouz/metacloud-devstack-deb8-context/master/FedCloud_install
+- bash /var/tmp/FedCloud_install
+
+power_state:
+- mode: reboot
