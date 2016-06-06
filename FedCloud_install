@@ -20,7 +20,7 @@ done
 
 # Install Fedcloud components
 for i in ONe rOCCI perun oneacct BDII; do
-	bash /var/tmp/$i{i}_${OS}
+	bash /var/tmp/${i}_${OS}
 done
 
 echo "FedCloud installation finished"
