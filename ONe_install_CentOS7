@@ -373,6 +373,7 @@ sed -i 's!^SCRIPTS_REMOTE_DIR=.*!SCRIPTS_REMOTE_DIR=/var/lib/one/remotes!'  /etc
 #systemctl start dnsmasq
 
 systemctl restart opennebula
+sleep 5
 
 
 # Create ONe infrastructure for onedock
