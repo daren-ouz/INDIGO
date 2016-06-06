@@ -1,0 +1,41 @@
+# This is a script for oneacct installation.
+# It is supposed to run in CentOS 7 environment.
+#
+# Copyright 2015 CESNET - INDIGO-DataCloud
+#
+#!/bin/bash
+
+
+#####################################################################
+echo "Oneacct-export installation starts"
+
+cd /etc/yum.repos.d
+wget -O oneacct-export.repo http://repository.egi.eu/community/software/oneacct.export/0.2.x/releases/repofiles/sl-6-x86_64.repo
+
+yum install -y oneacct-export
+
+sed -i "s/site_name: Undefined/site_name: Cesnet\'s Indigo FedCloud applience/" /etc/oneacct-export/conf.yml
+systemctl enable redis
+systemctl start redis
+systemctl enable oneacct-export-cron
+systemctl start oneacct-export-cron
+sed -i 's/^Defaults[ ]*requiretty/#Defaults    requiretty/' /etc/sudoers
+systemctl enable oneacct-export-sidekiq
+systemctl start oneacct-export-sidekiq
+
+# TODO: waiting for CentOS 7 version of APEL
+# GGUS #119768
+#yum -y install apel-client
+
+wget http://home.zcu.cz/~mulac/indigo/apel-ssm-2.1.7-1.el7.centos.noarch.rpm
+wget http://home.zcu.cz/~mulac/indigo/apel-lib-1.5.1-1.el7.centos.noarch.rpm
+wget http://home.zcu.cz/~mulac/indigo/apel-client-1.5.1-1.el7.centos.noarch.rpm
+#wget http://home.zcu.cz/~mulac/indigo/apel-parsers-1.5.1-1.el7.centos.noarch.rpm
+#wget http://home.zcu.cz/~mulac/indigo/apel-server-1.5.1-1.el7.centos.noarch.rpm
+yum install -y apel-client-1.5.1-1.el7.centos.noarch.rpm apel-ssm-2.1.7-1.el7.centos.noarch.rpm apel-lib-1.5.1-1.el7.centos.noarch.rpm
+
+touch /etc/oneacct-export/compat.one
+echo oneadmin >/etc/oneacct-export/groups.exclude
+
+echo "Oneacct-export installation finished"
+#####################################################################

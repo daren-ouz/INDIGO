@@ -1,0 +1,135 @@
+# This is a script for ONEDock installation.
+# It is supposed to run in CentOS 7 environment.
+#
+# Copyright 2015 CESNET - INDIGO-DataCloud
+#
+#!/bin/bash
+
+
+#####################################################################
+echo "ONEDock instalation starts"
+
+# install Docker
+curl -fsSL https://get.docker.com/ | sh
+systemctl enable docker
+systemctl start docker
+
+yum install -y docker-registry
+systemctl enable docker-registry.service
+service docker-registry start
+
+#reusing certificate generated for rOCCI
+mkdir -p /etc/docker/certs.d/$HOSTNAME:5000/
+cp /etc/ssl/certs/localhost.crt /etc/docker/certs.d/$HOSTNAME\:5000/
+cp /etc/ssl/certs/localhost.crt /etc/pki/ca-trust/source/anchors/
+update-ca-trust extract
+service docker restart
+
+yum -y install jq xmlstarlet
+
+cd /tmp/
+git clone https://github.com/indigo-dc/onedock
+cd onedock
+yes| ./setup_files.sh
+
+sed -i 's/data/images/' /var/lib/one/remotes/onedock.conf
+
+cat >> /etc/one/oned.conf << EOF
+IM_MAD = [
+      name       = "onedock",
+      executable = "one_im_ssh",
+      arguments  = "-r 3 -t 15 onedock" ]
+
+VM_MAD = [
+    name       = "onedock",
+    executable = "one_vmm_exec",
+    arguments  = "-t 15 -r 0 onedock",
+    type       = "xml" ]
+
+TM_MAD_CONF = [
+    name = "onedock", ln_target = "SYSTEM", clone_target = "SYSTEM", shared = "yes"
+]
+EOF
+
+sed -i 's/arguments = "-t 15 -d dummy,lvm,shared,fs_lvm,qcow2,ssh,vmfs,ceph,dev"/arguments = "-t 15 -d dummy,lvm,shared,fs_lvm,qcow2,ssh,vmfs,ceph,dev,onedock"/' /etc/one/oned.conf
+sed -i 's/arguments  = "-t 15 -d dummy,fs,vmfs,lvm,ceph,dev"/arguments  = "-t 15 -d dummy,fs,vmfs,lvm,ceph,dev,onedock"/' /etc/one/oned.conf
+
+
+# XXX: use /var/lib/one/remote/docker-manage-network (wiki says /var/tmp/one/docker-manage-network)
+# XXX: add /usr/sbin/losetup 
+sed -i 's!oneadmin ALL=(ALL) NOPASSWD: ONE_MISC, ONE_NET, ONE_LVM, ONE_ISCSI, ONE_OVS, ONE_XEN!Cmnd_Alias ONEDOCK = /var/lib/one/remotes/docker-manage-network, /usr/bin/qemu-nbd, /usr/bin/svncterm, /usr/sbin/losetup\n\noneadmin ALL=(ALL) NOPASSWD: ONE_MISC, ONE_NET, ONE_LVM, ONE_ISCSI, ONE_OVS, ONE_XEN, ONEDOCK!'  /etc/sudoers.d/opennebula 
+usermod -aG docker oneadmin
+
+sed -i 's!^SCRIPTS_REMOTE_DIR=.*!SCRIPTS_REMOTE_DIR=/var/lib/one/remotes!'  /etc/one/oned.conf
+
+# Start DHCPD for docker containers
+#cat > /etc/dnsmasq.d/doker.conf << EOF
+#strict-order
+#pid-file=/var/run/libvirt/network/docker.pid
+#except-interface=lo
+#bind-dynamic
+#interface=docker0
+#dhcp-range=172.17.10.1,172.17.10.100
+#dhcp-no-override
+#dhcp-lease-max=253
+#dhcp-hostsfile=/var/lib/libvirt/dnsmasq/docker.hostsfile
+#addn-hosts=/var/lib/libvirt/dnsmasq/docker.addnhosts
+#EOF
+
+#systemctl enable dnsmasq
+#systemctl start dnsmasq
+
+systemctl restart opennebula
+sleep 5
+
+
+# Create ONe infrastructure for onedock
+#
+cd /var/tmp
+
+# Create datastore
+cat > onedock.ds << EOF
+NAME=onedock
+DS_MAD=onedock
+TM_MAD=onedock
+EOF
+onedatastore create onedock.ds
+
+# Create image
+# - https://hub.docker.com/r/rastasheep/ubuntu-sshd/
+# - access root/root
+cat > ubuntu-docker.tmpl << EOF
+NAME="ubuntu"
+PATH=docker://rastasheep/ubuntu-sshd
+TYPE=OS
+DESCRIPTION="Ubuntu Trusty with SSHd"
+EOF
+oneimage create -d onedock ubuntu-docker.tmpl
+while [ "`oneimage list| grep onedock| grep lock`" ]; do echo -n .; sleep 1; done
+# check status, in case of err try use '127.0.0.1 HOSTNAME' instead of 'IP HOSTNAME' in /etc/hosts
+
+# Create network
+cat > docker-private.net << EOF
+NAME=private
+BRIDGE=docker0
+NETWORK_ADDRESS = "172.17.0.1"
+NETWORK_MASK    = "255.255.0.0"
+DNS             = "172.17.0.1"
+GATEWAY         = "172.17.0.1"
+AR=[TYPE = "IP4", IP = "172.17.10.1", SIZE = "100" ]
+EOF
+onevnet create docker-private.net
+
+# Create host
+echo "127.0.0.1 onedock-test" >> /etc/hosts
+onehost create onedock-test -i onedock -v onedock -n dummy
+
+# Create template
+onetemplate create --name "onedock-ubuntu-sshd" --memory 128 --cpu 1 --disk oneadmin[ubuntu] --nic oneadmin[private] --vnc --vnc-password onedock --vnc-listen 0.0.0.0 --net_context
+onetemplate chmod onedock-ubuntu-sshd 666
+
+# XXX: opravit /etc/sysconfig/network-scripts/ifcfg-eth0
+# PEERDNS="no"
+
+echo "Installation of ONEDock finished"
+#####################################################################

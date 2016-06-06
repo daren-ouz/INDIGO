@@ -1,0 +1,102 @@
+# This is a script for rOCCI installation.
+# It is supposed to run in CentOS 7 environment.
+#
+# Copyright 2015 CESNET - INDIGO-DataCloud
+#
+#!/bin/bash
+
+
+#####################################################################
+echo "rOCCI installation starts"
+
+# Create rocci test accounts
+#
+su - oneadmin -c "oneuser create rocci 'roccirocciroccirocciroccirocci' --driver server_cipher"
+su - oneadmin -c "oneuser chgrp rocci oneadmin"
+su - oneadmin -c "oneuser create roccitest 'roccitestroccitestroccitest'"
+
+# get passenger RPMs
+curl --fail -sSLo /etc/yum.repos.d/passenger.repo https://oss-binaries.phusionpassenger.com/yum/definitions/el-passenger.repo
+#yum install -y mod_passenger
+yum install -y yum-plugin-priorities
+
+
+#cd /etc/yum.repos.d
+#wget http://repository.egi.eu/community/software/rocci.server/1.1.x/releases/repofiles/sl-6-x86_64.repo
+# XXX: get sl7 version of RPM
+cd /tmp
+wget http://home.zcu.cz/~mulac/indigo/occi-server-1.1.7+20160201214854-1.el7.x86_64.rpm
+yum install -y occi-server-1.1.7+20160201214854-1.el7.x86_64.rpm
+
+if ( ! grep "Listen\s*11443" /etc/httpd/conf/httpd.conf); then \
+echo Listen 11443 >> /etc/httpd/conf/httpd.conf; fi
+mv /etc/httpd/conf.d/ssl.conf /etc/httpd/conf.d/ssl.conf_not_used
+
+
+# generate self-signed server certificate
+unalias -a
+cd /etc/ssl/certs/
+mv localhost.crt localhost.crt.orig
+sed -i "s/localhost.localdomain/$HOSTNAME/" make-dummy-cert
+./make-dummy-cert localhost.crt
+./renew-dummy-cert localhost.crt
+split -b `grep "^$" -b localhost.crt |sed 's/://'` localhost.crt CERT
+mkdir -p /etc/grid-security/certificates
+cp  /etc/ssl/certs/CERTab /etc/grid-security/hostcert.pem
+cp  /etc/ssl/certs/CERTaa /etc/grid-security/hostkey.pem
+cp  /etc/ssl/certs/CERTab /etc/grid-security/certificates/hostcert.pem
+
+# On OCCI client:
+# put rOCCI server cert to /usr/local/share/ca-certificates/hostcert.crt 
+# clear old certs&hashes if necessary
+# run update-ca-certificates -f
+# copy certificate and hash symlinks from /etc/ssl/certs to /etc/grid-security/certificates
+
+
+# rOCCI configuration
+sed -i 's/\(ROCCI_SERVER_BACKEND[ ]*\).*/\1opennebula/' /etc/httpd/conf.d/occi-ssl.conf
+sed -i 's/\(ROCCI_SERVER_ONE_USER[ ]*\).*/\1rocci/' /etc/httpd/conf.d/occi-ssl.conf
+sed -i 's/\(ROCCI_SERVER_ONE_PASSWD[ ]*\).*/\1roccirocciroccirocciroccirocci/' /etc/httpd/conf.d/occi-ssl.conf
+sed -i "s/\(ROCCI_SERVER_HOSTNAME[ ]*\).*/\1$HOSTNAME/" /etc/httpd/conf.d/occi-ssl.conf
+
+sed -i 's/Allow from all/&\n\tRequire all granted/' /etc/httpd/conf.d/occi-ssl.conf
+
+# install and configure gridsite
+yum install -y gridsite
+
+sed -i 's/#  GridSiteEnvs on/GridSiteEnvs on/' /etc/httpd/conf.d/occi-ssl.conf
+sed -i 's/#  GridSiteIndexes off/GridSiteIndexes off/' /etc/httpd/conf.d/occi-ssl.conf
+sed -i 's/#  GridSiteGSIProxyLimit 4/GridSiteGSIProxyLimit 4/' /etc/httpd/conf.d/occi-ssl.conf
+sed -i 's/#  GridSiteMethods ""/GridSiteMethods ""/' /etc/httpd/conf.d/occi-ssl.conf
+sed -i 's/\([ ]*SSLVerifyClient\).*/\1 require/' /etc/httpd/conf.d/occi-ssl.conf
+sed -i 's/\([ ]*SSLOptions\).*/\1 +StdEnvVars +ExportCertData/' /etc/httpd/conf.d/occi-ssl.conf
+
+mkdir -p /etc/grid-security/vomsdir/fedcloud.egi.eu
+
+cat > /etc/grid-security/vomsdir/fedcloud.egi.eu/voms1.egee.cesnet.cz.lsc << EOF
+/DC=org/DC=terena/DC=tcs/C=CZ/ST=Hlavni mesto Praha/L=Praha 6/O=CESNET/CN=voms1.grid.cesnet.cz
+/C=NL/ST=Noord-Holland/L=Amsterdam/O=TERENA/CN=TERENA eScience SSL CA 3
+EOF
+
+cat > /etc/grid-security/vomsdir/fedcloud.egi.eu/voms2.grid.cesnet.cz.lsc << EOF
+/DC=org/DC=terena/DC=tcs/C=CZ/ST=Hlavni mesto Praha/L=Praha 6/O=CESNET/CN=voms2.grid.cesnet.cz
+/C=NL/ST=Noord-Holland/L=Amsterdam/O=TERENA/CN=TERENA eScience SSL CA 3
+EOF
+
+# install EGI CA certificates
+cat << EOT > /etc/yum.repos.d/egi_ca.repo
+[EGI-trustanchors]
+name=EGI-trustanchors
+baseurl=http://repository.egi.eu/sw/production/cas/1/current/
+gpgkey=http://repository.egi.eu/sw/production/cas/1/GPG-KEY-EUGridPMA-RPM-3
+gpgcheck=1
+enabled=1
+EOT
+yum install -y ca-policy-egi-core
+
+systemctl enable httpd.service
+systemctl start httpd.service
+systemctl restart  memcached.service
+
+echo "rOCCI installation finished"
+#####################################################################

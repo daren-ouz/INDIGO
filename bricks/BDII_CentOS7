@@ -1,0 +1,39 @@
+# This is a script for BDII installation.
+# It is supposed to run in CentOS 7 environment.
+#
+# Copyright 2015 CESNET - INDIGO-DataCloud
+#
+#!/bin/bash
+
+
+#####################################################################
+echo "BDII + cloud info provider installation starts"
+
+yum install -y bdii
+
+# TODO: waiting for CentOS 7 version of cloud-info-provider-service
+# GGUS #119768
+#yum install -y cloud-info-provider-service
+
+wget http://home.zcu.cz/~mulac/indigo/cloud-info-provider-0.5-1.el7.centos.noarch.rpm
+yum install -y cloud-info-provider-0.5-1.el7.centos.noarch.rpm
+
+cp /etc/cloud-info-provider/sample.opennebularocci.yaml /etc/cloud-info-provider/bdii.yaml
+sed -i "s/#name: SITE_NAME/name: Cesnet\'s Indigo FedCloud applience/" /etc/cloud-info-provider/bdii.yaml
+sed -i "s/api_type: ON-XML-RPC/api_type: OCCI/" /etc/cloud-info-provider/bdii.yaml
+
+cat >/var/lib/bdii/gip/provider/cloud-info-provider <<EOF
+#!/bin/sh
+
+cloud-info-provider-service	--yaml /etc/cloud-info-provider/bdii.yaml \\
+				--middleware opennebularocci \\
+				--on-auth roccitest:roccitestroccitestroccitest \\
+				--on-rpcxml-endpoint http://$HOSTNAME:2633/RPC2
+EOF
+chmod +x /var/lib/bdii/gip/provider/cloud-info-provider
+
+systemctl enable bdii
+systemctl start bdii
+
+echo "BDII + cloud info provider installation finished"
+#####################################################################

@@ -1,0 +1,30 @@
+# This is a script for Perun installation.
+# It is supposed to run in CentOS 7 environment.
+#
+# Copyright 2015 CESNET - INDIGO-DataCloud
+#
+#!/bin/bash
+
+
+#####################################################################
+echo "Perun installation starts"
+
+# Be sure you are member of some VO which will feed Perun with some data. 
+# For more info, see https://wiki.egi.eu/wiki/HOWTO11#Credentials
+
+echo 'from="perun.ics.muni.cz",command="/opt/perun/bin/perun" ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC26+QiDtZ3bnLiLllySgsImSPUX0/sFBmo//3PmqOsuJIBdWB5BLU5Ws+pTRxefqC8SHfI92ZQoGXe7aJniTXxbRPa0FZJ3fskAHwpbiJfstGVZ1hddBcHIvial3v5Rd++zRiKslDVTkXLlb+b1pTnjyTVbD/6kGILgnUz7RKY5DnXADVnmTdPliQCabhE41AhkWdcuWpHBNwvxONKoZJJpbuouDbcviX4lJu9TF9Ij62rZjcoNzg5/JiIKTcMVi8L04FTjyCMxKRzlo00IjSuapFnXQNNZUL5u/mfPA/HpyIkSAOiPXLhWy9UuBNo7xdrCmfTh1qUvzbuWXJZN3d9 perunv3@perun.ics.muni.cz' >>~oneadmin/.ssh/authorized_keys
+
+yum install -y perl-XML-XPath
+
+cd /tmp
+git clone https://github.com/EGI-FCTF/fctf-perun
+mkdir -p /opt/perun/bin
+cd /opt/perun/bin
+cp -r /tmp/fctf-perun/* /opt/perun/bin
+
+onegroup create -n fedcloud.egi.eu
+#onegroup create -n vo.indigo-datacloud.eu
+
+echo "Perun installation finished"
+#####################################################################
+
