@@ -1,0 +1,26 @@
+# This is a script for ONe FedCloud installation.
+# It is supposed to run in CentOS envirnment.
+#
+# Copyright 2015 CESNET - INDIGO-DataCloud
+#
+#!/bin/bash
+
+set -x
+
+echo "FedCloud installation starts"
+
+OS=CentOS7
+GIT=https://raw.githubusercontent.com/daren-ouz/metacloud-devstack-deb8-context/master
+
+cd /var/tmp
+# Download FedCloud components installators
+for i in ONe rOCCI perun oneacct BDII; do
+	wget ${GIT}/bricks/${i}${OS}
+done
+
+# Install Fedcloud components
+for i in ONe rOCCI perun oneacct BDII; do
+	bash /var/tmp/$i{i}${OS}
+done
+
+echo "FedCloud installation finished"
