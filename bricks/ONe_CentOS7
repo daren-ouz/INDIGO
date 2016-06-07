@@ -17,7 +17,7 @@ fi
 
 # Dissable SELinux
 sed -i 's/^SELINUX=.*/SELINUX=disabled/' /etc/sysconfig/selinux
-setenforce 0
+set +e; setenforce 0; set -e
 
 # Add repo
 yum install -y epel-release
@@ -49,6 +49,7 @@ systemctl enable opennebula
 systemctl start opennebula
 systemctl enable opennebula-sunstone
 systemctl start opennebula-sunstone
+sleep 5
 
 # change oneadmin's password
 su  oneadmin -c "oneuser passwd oneadmin 'opennebula'"
