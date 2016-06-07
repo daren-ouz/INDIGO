@@ -6,6 +6,11 @@
 #!/bin/bash
 
 set -x
+set -e
+set -o set -o pipefail
+
+trap 'echo;echo; echo "ERROR during installation!";echo; echo;' ERR
+
 
 DESC="FedCloud testbed"
 BRICKS="ONe rOCCI perun oneacct BDII"
@@ -25,7 +30,7 @@ done
 # Install components
 for i in $BRICKS; do
 	echo "$i installation start"
-	bash /var/tmp/${i}_${OS}
+	source /var/tmp/${i}_${OS}
 	echo "$i installation finished"
 done
 
