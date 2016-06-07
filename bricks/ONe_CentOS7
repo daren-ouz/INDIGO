@@ -49,10 +49,14 @@ systemctl enable opennebula
 systemctl start opennebula
 systemctl enable opennebula-sunstone
 systemctl start opennebula-sunstone
+systemctl status opennebula.service
 sleep 5
+systemctl status opennebula.service
+sleep 20
+systemctl status opennebula.service
+su  oneadmin -c "oneuser list"
 
 # change oneadmin's password
-su  oneadmin -c "oneuser list"
 su  oneadmin -c "oneuser passwd oneadmin 'opennebula'"
 echo "oneadmin:opennebula" > /var/lib/one/.one/one_auth
 

@@ -9,7 +9,7 @@ set -x
 set -e
 set -o pipefail
 
-trap 'ER=$?; echo;echo; echo "ERROR during installation!";echo; echo; exit $?' ERR
+trap 'ER=$?; echo;echo; echo "ERROR during installation!";echo; echo; exit $ER' ERR
 
 
 DESC="FedCloud testbed"
