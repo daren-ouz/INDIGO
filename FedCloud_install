@@ -15,12 +15,15 @@ GIT=https://raw.githubusercontent.com/daren-ouz/metacloud-devstack-deb8-context/
 cd /var/tmp
 # Download FedCloud components installators
 for i in ONe rOCCI perun oneacct BDII; do
+	echo "Downloading $i installator"
 	wget ${GIT}/bricks/${i}_${OS}
 done
 
 # Install Fedcloud components
 for i in ONe rOCCI perun oneacct BDII; do
+	echo "$i installation start"
 	bash /var/tmp/${i}_${OS}
+	echo "$i installation finished"
 done
 
 echo "FedCloud installation finished"

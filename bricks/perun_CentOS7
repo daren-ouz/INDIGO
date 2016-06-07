@@ -6,9 +6,6 @@
 #!/bin/bash
 
 
-#####################################################################
-echo "Perun installation starts"
-
 # Be sure you are member of some VO which will feed Perun with some data. 
 # For more info, see https://wiki.egi.eu/wiki/HOWTO11#Credentials
 
@@ -24,7 +21,4 @@ cp -r /tmp/fctf-perun/* /opt/perun/bin
 
 onegroup create -n fedcloud.egi.eu
 #onegroup create -n vo.indigo-datacloud.eu
-
-echo "Perun installation finished"
-#####################################################################
 

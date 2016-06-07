@@ -6,9 +6,6 @@
 #!/bin/bash
 
 
-#####################################################################
-echo "ONe installation start"
-
 # some commands bellow need resolvation
 if [ ! "`grep 127.0.0.1 /etc/hosts|grep $HOSTNAME`" ];
 then
@@ -96,6 +93,3 @@ onetemplate chmod ttylinux 666
 su - oneadmin -c "cat ~/.ssh/id_dsa.pub >> ~/.ssh/authorized_keys"
 su - oneadmin -c "ssh-keyscan -t ecdsa,rsa,dsa $HOSTNAME >> ~/.ssh/known_hosts"
 onehost create $HOSTNAME -i kvm -v kvm -n dummy
-
-echo "ONe installation finished"
-#####################################################################

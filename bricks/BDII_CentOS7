@@ -6,9 +6,6 @@
 #!/bin/bash
 
 
-#####################################################################
-echo "BDII + cloud info provider installation starts"
-
 yum install -y bdii
 
 # TODO: waiting for CentOS 7 version of cloud-info-provider-service
@@ -34,6 +31,3 @@ chmod +x /var/lib/bdii/gip/provider/cloud-info-provider
 
 systemctl enable bdii
 systemctl start bdii
-
-echo "BDII + cloud info provider installation finished"
-#####################################################################

@@ -6,9 +6,6 @@
 #!/bin/bash
 
 
-#####################################################################
-echo "rOCCI installation starts"
-
 # Create rocci test accounts
 #
 su - oneadmin -c "oneuser create rocci 'roccirocciroccirocciroccirocci' --driver server_cipher"
@@ -97,6 +94,3 @@ yum install -y ca-policy-egi-core
 systemctl enable httpd.service
 systemctl start httpd.service
 systemctl restart  memcached.service
-
-echo "rOCCI installation finished"
-#####################################################################

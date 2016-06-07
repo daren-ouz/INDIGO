@@ -6,9 +6,6 @@
 #!/bin/bash
 
 
-#####################################################################
-echo "Oneacct-export installation starts"
-
 cd /etc/yum.repos.d
 wget -O oneacct-export.repo http://repository.egi.eu/community/software/oneacct.export/0.2.x/releases/repofiles/sl-6-x86_64.repo
 
@@ -36,6 +33,3 @@ yum install -y apel-client-1.5.1-1.el7.centos.noarch.rpm apel-ssm-2.1.7-1.el7.ce
 
 touch /etc/oneacct-export/compat.one
 echo oneadmin >/etc/oneacct-export/groups.exclude
-
-echo "Oneacct-export installation finished"
-#####################################################################

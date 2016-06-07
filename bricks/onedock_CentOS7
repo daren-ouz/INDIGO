@@ -6,9 +6,6 @@
 #!/bin/bash
 
 
-#####################################################################
-echo "ONEDock instalation starts"
-
 # install Docker
 curl -fsSL https://get.docker.com/ | sh
 systemctl enable docker
@@ -130,6 +127,3 @@ onetemplate chmod onedock-ubuntu-sshd 666
 
 # XXX: opravit /etc/sysconfig/network-scripts/ifcfg-eth0
 # PEERDNS="no"
-
-echo "Installation of ONEDock finished"
-#####################################################################
