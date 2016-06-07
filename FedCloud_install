@@ -7,7 +7,7 @@
 
 set -x
 set -e
-set -o set -o pipefail
+set -o pipefail
 
 trap 'echo;echo; echo "ERROR during installation!";echo; echo;' ERR
 
