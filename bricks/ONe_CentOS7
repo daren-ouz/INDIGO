@@ -17,7 +17,7 @@ fi
 
 # Dissable SELinux
 sed -i 's/^SELINUX=.*/SELINUX=disabled/' /etc/sysconfig/selinux
-set +e; setenforce 0; set -e
+if [ "`getenforce`" == "Enabled" ]; then setenforce 0; fi
 
 # Add repo
 yum install -y epel-release
