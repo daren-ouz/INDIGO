@@ -23,7 +23,7 @@ for i in $BRICKS; do
 done
 
 # Install components
-for i in BRICKS; do
+for i in $BRICKS; do
 	echo "$i installation start"
 	bash /var/tmp/${i}_${OS}
 	echo "$i installation finished"
