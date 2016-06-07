@@ -52,6 +52,7 @@ systemctl start opennebula-sunstone
 sleep 5
 
 # change oneadmin's password
+su  oneadmin -c "oneuser list"
 su  oneadmin -c "oneuser passwd oneadmin 'opennebula'"
 echo "oneadmin:opennebula" > /var/lib/one/.one/one_auth
 
