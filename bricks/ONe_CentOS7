@@ -50,10 +50,9 @@ systemctl start opennebula
 systemctl enable opennebula-sunstone
 systemctl start opennebula-sunstone
 systemctl status opennebula.service
-sleep 5
-systemctl status opennebula.service
-sleep 20
-systemctl status opennebula.service
+
+echo "Waiting ONe to settle"
+for i in `seq 60`; do oneuser list 1>/dev/null && break; echo -n .; sleep 1; done
 su  oneadmin -c "oneuser list"
 
 # change oneadmin's password
