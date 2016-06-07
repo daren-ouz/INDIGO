@@ -65,8 +65,8 @@ sed -i 's/#  GridSiteEnvs on/GridSiteEnvs on/' /etc/httpd/conf.d/occi-ssl.conf
 sed -i 's/#  GridSiteIndexes off/GridSiteIndexes off/' /etc/httpd/conf.d/occi-ssl.conf
 sed -i 's/#  GridSiteGSIProxyLimit 4/GridSiteGSIProxyLimit 4/' /etc/httpd/conf.d/occi-ssl.conf
 sed -i 's/#  GridSiteMethods ""/GridSiteMethods ""/' /etc/httpd/conf.d/occi-ssl.conf
-sed -i 's/\([ ]*SSLVerifyClient\).*/\1 require/' /etc/httpd/conf.d/occi-ssl.conf
-sed -i 's/\([ ]*SSLOptions\).*/\1 +StdEnvVars +ExportCertData/' /etc/httpd/conf.d/occi-ssl.conf
+sed -i 's/\([^#]SSLVerifyClient\).*/\1 optional/' /etc/httpd/conf.d/occi-ssl.conf
+sed -i 's/\(SSLOptions\).*/\1 +StdEnvVars +ExportCertData/' /etc/httpd/conf.d/occi-ssl.conf
 
 mkdir -p /etc/grid-security/vomsdir/fedcloud.egi.eu
 
