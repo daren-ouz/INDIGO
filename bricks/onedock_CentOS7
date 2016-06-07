@@ -77,7 +77,10 @@ sed -i 's!^SCRIPTS_REMOTE_DIR=.*!SCRIPTS_REMOTE_DIR=/var/lib/one/remotes!'  /etc
 #systemctl start dnsmasq
 
 systemctl restart opennebula
-sleep 5
+
+echo "Waiting ONe to settle"
+for i in `seq 120`; do oneuser list 2>/dev/null 1>&2 && break; echo -n .; sleep 1; done
+oneuser list
 
 
 # Create ONe infrastructure for onedock

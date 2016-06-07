@@ -52,7 +52,7 @@ systemctl start opennebula-sunstone
 systemctl status opennebula.service
 
 echo "Waiting ONe to settle"
-for i in `seq 60`; do oneuser list 1>/dev/null && break; echo -n .; sleep 1; done
+for i in `seq 120`; do oneuser list 2>/dev/null 1>&2 && break; echo -n .; sleep 1; done
 su  oneadmin -c "oneuser list"
 
 # change oneadmin's password
