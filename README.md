@@ -1,5 +1,11 @@
-ONEDock_testbed_install
-----------------
+# CESNETs' appliences
+
+In this reporitory, CESNETs' appliences created in INDIGO project are stored. There are older ones written for Debian 8 and newer ones written for Centos 7. All appliences install only simple  one host environment where all the components coexist together - this is maily for sake of simplicity (minimum firewall, configuration and orchestration issues).
+
+---
+
+## ONEDock_testbed_install
+
 ONEDock testbed applience on CentOS 7. 
 
 - bricks    : ONe, rOCCI, ONEDock
@@ -15,8 +21,8 @@ power_state:
 - mode: reboot
 
 
-FedCloud_install
-----------------
+
+## FedCloud_install
 
 FedCloud applience on CentOS 7. 
 
@@ -34,8 +40,8 @@ power_state:
 - mode: reboot
 
 
-ONe_install_CentOS7
--------------------
+
+## ONe_install_CentOS7
 
 Script (NOT COMPLETED YET!) creating FedCloud applience on CentOS 7. 
 
@@ -53,8 +59,8 @@ power_state:
 - mode: reboot
 
 
-ONe_install
------------
+
+## ONe_install
 
 Script creating ONe 4.14 applience on Debian 8. Creates also rOCCI accounts. Sets default password for oneadmin, however is should be changed.
 
@@ -69,8 +75,8 @@ power_state:
 - mode: reboot
 
 
-rOCCI_install
--------------
+
+## rOCCI_install
 
 Script creating rOCCI appliance on Debian 8. Takes ONe endpoint as a parameter. Uses account/password created in ONe applience as a default, however, may be customized to use any ONe installation. 
 
