@@ -1,3 +1,58 @@
+ONEDock_testbed_install
+----------------
+ONEDock testbed applience on CentOS 7. 
+
+- bricks    : ONe, rOCCI, ONEDock
+
+Supposed to be run via cloudinit as:
+
+runcmd:
+- cd /var/tmp
+- wget https://raw.githubusercontent.com/daren-ouz/INDIGO/master/ONEDock_testbed_install
+- bash /var/tmp/FedCloud_install
+
+power_state:
+- mode: reboot
+
+
+FedCloud_install
+----------------
+
+FedCloud applience on CentOS 7. 
+
+- bricks    : ONe, rOCCI, Perun, oneacct, BDII
+- in progress : vmcatcher
+
+Supposed to be run via cloudinit as:
+
+runcmd:
+- cd /var/tmp
+- wget https://raw.githubusercontent.com/daren-ouz/INDIGO/master/FedCloud_install
+- bash /var/tmp/FedCloud_install
+
+power_state:
+- mode: reboot
+
+
+ONe_install_CentOS7
+-------------------
+
+Script (NOT COMPLETED YET!) creating FedCloud applience on CentOS 7. 
+
+- supports    : ONe, rOCCI, Perun
+- in progress : vmcatcher, oneacct, BDII (for more details see GGUS 119768)
+
+Supposed to be run via cloudinit as:
+
+runcmd:
+- cd /var/tmp
+- wget https://raw.githubusercontent.com/daren-ouz/INDIGO/master/ONe_install_CentOS7
+- bash /var/tmp/ONe_install_CentOS7
+
+power_state:
+- mode: reboot
+
+
 ONe_install
 -----------
 
@@ -30,39 +85,4 @@ power_state:
 - mode: reboot
 
 
-ONe_install_CentOS7
--------------------
 
-Script (NOT COMPLETED YET!) creating FedCloud applience on CentOS 7. 
-
-- supports    : ONe, rOCCI, Perun
-- in progress : vmcatcher, oneacct, BDII (for more details see GGUS 119768)
-
-Supposed to be run via cloudinit as:
-
-runcmd:
-- cd /var/tmp
-- wget https://raw.githubusercontent.com/daren-ouz/INDIGO/master/ONe_install_CentOS7
-- bash /var/tmp/ONe_install_CentOS7
-
-power_state:
-- mode: reboot
-
-
-FedCloud_install
-----------------
-
-FedCloud applience on CentOS 7. 
-
-- supports    : ONe, rOCCI, Perun, oneacct and BDII
-- in progress : vmcatcher
-
-Supposed to be run via cloudinit as:
-
-runcmd:
-- cd /var/tmp
-- wget https://raw.githubusercontent.com/daren-ouz/INDIGO/master/FedCloud_install
-- bash /var/tmp/FedCloud_install
-
-power_state:
-- mode: reboot
