@@ -1,4 +1,4 @@
-# This is a script for FedCloud testbed installation.
+# This is a script for ONEDock testbed installation.
 # It is supposed to run in CentOS envirnment.
 #
 # Copyright 2015 CESNET - INDIGO-DataCloud
@@ -13,8 +13,8 @@ set -o pipefail
 trap 'ER=$?; echo;echo; echo "ERROR during installation!";echo; echo; exit $ER' ERR
 
 
-DESC="FedCloud testbed"
-BRICKS="ONe rOCCI perun oneacct BDII"
+DESC="ONEDock testbed"
+BRICKS="ONe rOCCI ONEDock"
 OS=CentOS7
 GIT=https://raw.githubusercontent.com/daren-ouz/INDIGO/master
 

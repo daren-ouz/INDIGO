@@ -7,7 +7,7 @@ Supposed to be run via cloudinit as:
 
 runcmd:
 - cd /var/tmp
-- wget https://raw.githubusercontent.com/daren-ouz/metacloud-devstack-deb8-context/master/ONe_install
+- wget https://raw.githubusercontent.com/daren-ouz/INDIGO/master/ONe_install
 - bash /var/tmp/ONe_install
 
 power_state:
@@ -23,7 +23,7 @@ Supposed to be run via cloudinit as:
 
 runcmd:
 - cd /var/tmp
-- wget https://raw.githubusercontent.com/daren-ouz/metacloud-devstack-deb8-context/master/rOCCI_install
+- wget https://raw.githubusercontent.com/daren-ouz/INDIGO/master/rOCCI_install
 - bash /var/tmp/rOCCI_install HERE_PUT_ONe_HOSTNAME
 
 power_state:
@@ -42,7 +42,7 @@ Supposed to be run via cloudinit as:
 
 runcmd:
 - cd /var/tmp
-- wget https://raw.githubusercontent.com/daren-ouz/metacloud-devstack-deb8-context/master/ONe_install_CentOS7
+- wget https://raw.githubusercontent.com/daren-ouz/INDIGO/master/ONe_install_CentOS7
 - bash /var/tmp/ONe_install_CentOS7
 
 power_state:
@@ -61,7 +61,7 @@ Supposed to be run via cloudinit as:
 
 runcmd:
 - cd /var/tmp
-- wget https://raw.githubusercontent.com/daren-ouz/metacloud-devstack-deb8-context/master/FedCloud_install
+- wget https://raw.githubusercontent.com/daren-ouz/INDIGO/master/FedCloud_install
 - bash /var/tmp/FedCloud_install
 
 power_state:
