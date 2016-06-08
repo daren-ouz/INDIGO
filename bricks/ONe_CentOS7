@@ -17,7 +17,7 @@ fi
 
 # Dissable SELinux
 sed -i 's/^SELINUX=.*/SELINUX=disabled/' /etc/sysconfig/selinux
-if [ "`getenforce`" == "Enabled" ]; then setenforce 0; fi
+setenforce 0 || echo -n
 
 # Add repo
 yum install -y epel-release
@@ -42,8 +42,8 @@ sed -i 's/"kvm" ]/"qemu" ]/' /etc/one/oned.conf
 
 # Enable/run ONe & Sunstone
 # XXX: open just required ports, i.e. 9869 for sunstone
-systemctl stop firewalld
-systemctl mask firewalld
+systemctl stop firewalld || echo -n
+systemctl mask firewalld || echo -n
 
 systemctl enable opennebula
 systemctl start opennebula

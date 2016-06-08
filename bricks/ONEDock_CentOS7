@@ -27,7 +27,7 @@ yum -y install jq xmlstarlet
 cd /tmp/
 git clone https://github.com/indigo-dc/onedock
 cd onedock
-yes| ./setup_files.sh
+yes| ./setup_files.sh || echo -n
 
 sed -i 's/data/images/' /var/lib/one/remotes/onedock.conf
 
