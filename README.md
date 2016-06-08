@@ -1,6 +1,6 @@
-# CESNETs' appliences
+# CESNET appliences
 
-In this reporitory, CESNETs' appliences created in INDIGO project are stored. There are older ones written for Debian 8 and newer ones written for Centos 7. All appliences install only simple  one host environment where all the components coexist together - this is maily for sake of simplicity (minimum firewall, configuration and orchestration issues).
+In this reporitory, CESNET appliences created in INDIGO project are stored. There are older ones written for Debian 8 and newer ones written for Centos 7. All appliences install only simple one-host environment where all the components coexist together - this is maily for sake of simplicity (minimum firewall, configuration and orchestration issues).
 
 ---
 
