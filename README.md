@@ -14,6 +14,7 @@ Supposed to be run via cloudinit as:
 
 runcmd:
 - cd /var/tmp
+- yum install -y wget
 - wget https://raw.githubusercontent.com/daren-ouz/INDIGO/master/ONEDock_testbed_install
 - bash /var/tmp/ONEDock_testbed_install
 
@@ -33,6 +34,7 @@ Supposed to be run via cloudinit as:
 
 runcmd:
 - cd /var/tmp
+- yum install -y wget
 - wget https://raw.githubusercontent.com/daren-ouz/INDIGO/master/FedCloud_install
 - bash /var/tmp/FedCloud_install
 
@@ -52,6 +54,7 @@ Supposed to be run via cloudinit as:
 
 runcmd:
 - cd /var/tmp
+- yum install -y wget
 - wget https://raw.githubusercontent.com/daren-ouz/INDIGO/master/ONe_install_CentOS7
 - bash /var/tmp/ONe_install_CentOS7
 
@@ -68,6 +71,7 @@ Supposed to be run via cloudinit as:
 
 runcmd:
 - cd /var/tmp
+- yum install -y wget
 - wget https://raw.githubusercontent.com/daren-ouz/INDIGO/master/ONe_install
 - bash /var/tmp/ONe_install
 
@@ -84,6 +88,7 @@ Supposed to be run via cloudinit as:
 
 runcmd:
 - cd /var/tmp
+- yum install -y wget
 - wget https://raw.githubusercontent.com/daren-ouz/INDIGO/master/rOCCI_install
 - bash /var/tmp/rOCCI_install HERE_PUT_ONe_HOSTNAME
 
