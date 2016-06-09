@@ -15,7 +15,7 @@ Supposed to be run via cloudinit as:
 runcmd:
 - cd /var/tmp
 - wget https://raw.githubusercontent.com/daren-ouz/INDIGO/master/ONEDock_testbed_install
-- bash /var/tmp/FedCloud_install
+- bash /var/tmp/ONEDock_testbed_install
 
 power_state:
 - mode: reboot
