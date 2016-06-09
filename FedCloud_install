@@ -35,4 +35,6 @@ for i in $BRICKS; do
 	echo "$i installation finished"
 done
 
-echo "$DESC installation finished"
+echo
+echo "$DESC installation successfully finished"
+echo
