@@ -1,12 +1,12 @@
-# CESNET appliences
+# CESNET appliances
 
-In this reporitory, CESNET appliences created in INDIGO project are stored. There are older ones written for Debian 8 and newer ones written for Centos 7. All appliences install only simple one-host environment where all the components coexist together - this is maily for sake of simplicity (minimum firewall, configuration and orchestration issues).
+In this reporitory, CESNET appliances created in INDIGO project are stored. There are older ones written for Debian 8 and newer ones written for Centos 7. All appliances install only simple one-host environment where all the components coexist together - this is maily for sake of simplicity (minimum firewall, configuration and orchestration issues).
 
 ---
 
 ## ONEDock_testbed_install
 
-ONEDock testbed applience on CentOS 7. 
+ONEDock testbed appliance on CentOS 7. 
 
 - bricks    : ONe, rOCCI, ONEDock
 
@@ -24,7 +24,7 @@ power_state:
 
 ## FedCloud_install
 
-FedCloud applience on CentOS 7. 
+FedCloud appliance on CentOS 7. 
 
 - bricks    : ONe, rOCCI, Perun, oneacct, BDII
 - in progress : vmcatcher
@@ -43,7 +43,7 @@ power_state:
 
 ## ONe_install_CentOS7
 
-Script (NOT COMPLETED YET!) creating FedCloud applience on CentOS 7. 
+Script (NOT COMPLETED YET!) creating FedCloud appliance on CentOS 7. 
 
 - supports    : ONe, rOCCI, Perun
 - in progress : vmcatcher, oneacct, BDII (for more details see GGUS 119768)
@@ -62,7 +62,7 @@ power_state:
 
 ## ONe_install
 
-Script creating ONe 4.14 applience on Debian 8. Creates also rOCCI accounts. Sets default password for oneadmin, however is should be changed.
+Script creating ONe 4.14 appliance on Debian 8. Creates also rOCCI accounts. Sets default password for oneadmin, however is should be changed.
 
 Supposed to be run via cloudinit as:
 
@@ -78,7 +78,7 @@ power_state:
 
 ## rOCCI_install
 
-Script creating rOCCI appliance on Debian 8. Takes ONe endpoint as a parameter. Uses account/password created in ONe applience as a default, however, may be customized to use any ONe installation. 
+Script creating rOCCI appliance on Debian 8. Takes ONe endpoint as a parameter. Uses account/password created in ONe appliance as a default, however, may be customized to use any ONe installation. 
 
 Supposed to be run via cloudinit as:
 
