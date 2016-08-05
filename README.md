@@ -43,6 +43,27 @@ power_state:
 
 
 
+## FedCloud_on_ONe5_install
+
+FedCloud appliance on CentOS 7. 
+
+- bricks    : ONe5
+- in progress : rOCCI, Perun, oneacct, BDII, vmcatcher
+
+Supposed to be run via cloudinit as:
+
+runcmd:
+- cd /var/tmp
+- yum install -y wget
+- wget https://raw.githubusercontent.com/daren-ouz/INDIGO/master/FedCloud_on_ONe5_install
+- bash /var/tmp/FedCloud_on_ONe5_install
+
+power_state:
+- mode: reboot
+
+
+
+
 ## ONe_install_CentOS7
 
 Script (NOT COMPLETED YET!) creating FedCloud appliance on CentOS 7. 
