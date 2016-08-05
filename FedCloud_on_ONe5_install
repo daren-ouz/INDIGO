@@ -1,0 +1,41 @@
+# This is a script for FedCloud testbed installation based on ONe 5.0
+# It is supposed to run in CentOS envirnment.
+#
+# Copyright 2015 CESNET - INDIGO-DataCloud
+#
+#!/bin/bash
+
+set -x
+set -e
+set -o pipefail
+
+# exit imediately after error
+trap 'ER=$?; echo;echo; echo "ERROR during installation!";echo; echo; exit $ER' ERR
+
+
+DESC="FedCloud on ONe5 testbed"
+BRICKS="ONe5"
+#BRICKS="ONe rOCCI perun oneacct BDII"
+OS=CentOS7
+GIT=https://raw.githubusercontent.com/daren-ouz/INDIGO/master
+
+
+echo "$DESC installation starts"
+
+cd /var/tmp
+# Download components
+for i in $BRICKS; do
+	echo "Downloading $i installator"
+	wget ${GIT}/bricks/${i}_${OS}
+done
+
+# Install components
+for i in $BRICKS; do
+	echo "$i installation start"
+	source /var/tmp/${i}_${OS}
+	echo "$i installation finished"
+done
+
+echo
+echo "$DESC installation successfully finished"
+echo
