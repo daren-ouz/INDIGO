@@ -1,0 +1,106 @@
+# This is a script for ONe 5.0 installation.
+# It is supposed to run in CentOS 7 environment.
+#
+# Copyright 2015 CESNET - INDIGO-DataCloud
+#
+#!/bin/bash
+
+
+# some commands bellow need resolvation
+if [ ! "`grep 127.0.0.1 /etc/hosts|grep $HOSTNAME`" ];
+then
+        echo "127.0.0.1 $HOSTNAME `hostname -s`" >>/etc/hosts;
+fi
+
+# Install Server
+#
+
+# Dissable SELinux
+sed -i 's/^SELINUX=.*/SELINUX=disabled/' /etc/sysconfig/selinux
+setenforce 0 || echo -n
+
+# Add repo
+yum install -y epel-release
+cat << EOT > /etc/yum.repos.d/opennebula.repo
+[opennebula]
+name=opennebula
+baseurl=http://downloads.opennebula.org/repo/5.0/CentOS/7/x86_64/
+enabled=1
+gpgcheck=0
+EOT
+
+# Install packages
+yum -y install opennebula-server opennebula-sunstone opennebula-ruby opennebula-gate opennebula-flow
+yum -y install ruby-devel gcc mysql-devel gcc-c++ libcurl-devel sqlite-devel
+#yum -y install gcc mysql-devel ruby-devel rubygems libcurl-devel gcc-c++ sqlite-devel
+echo "1
+
+" | /usr/share/one/install_gems
+
+# Configure Sunstone & ONe
+sed -i 's/:host: 127.0.0.1/:host: 0.0.0.0/' /etc/one/sunstone-server.conf
+sed -i 's/TYPE           = "kvm"/TYPE           = "qemu"/' /etc/one/oned.conf
+grep -q 'TYPE           = "qemu"' /etc/one/oned.conf || echo "no hit by previous sed"
+
+# Enable/run ONe & Sunstone
+# XXX: open just required ports, i.e. 9869 for sunstone
+systemctl stop firewalld || echo -n
+systemctl mask firewalld || echo -n
+
+systemctl enable opennebula
+systemctl start opennebula
+systemctl status opennebula
+systemctl enable opennebula-sunstone
+systemctl start opennebula-sunstone
+systemctl status opennebula-sunstone
+
+echo "Waiting ONe to settle"
+for i in `seq 120`; do oneuser list 2>/dev/null 1>&2 && break; echo -n .; sleep 1; done
+su  oneadmin -c "oneuser list"
+
+# change oneadmin's password
+su  oneadmin -c "oneuser passwd oneadmin 'opennebula'"
+echo "oneadmin:opennebula" > /var/lib/one/.one/one_auth
+
+# Configure SSH Public Key
+su  oneadmin -c 'cat << EOT > ~/.ssh/config
+Host *
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+EOT
+
+chmod 600 ~/.ssh/config'
+
+
+# Install ONe node
+#
+
+yum install -y opennebula-node-kvm
+systemctl enable libvirtd
+systemctl start libvirtd
+
+# Create ON infrastructure
+
+# Disk
+oneimage create -d default --name ttylinux --path http://marketplace.c12g.com/appliance/4fc76a938fb81d3517000003/download/0
+oneimage chmod ttylinux 666
+echo -n "Waiting for image to be ready"
+while [ "`oneimage list| grep lock`" ]; do echo -n .; sleep 1; done
+
+# Network
+NET=`ip addr  show virbr0| grep inet| awk '{print $2}'| sed 's/\.[^\.]*$//'`
+printf "NAME = example\nTYPE = RANGED\nBRIDGE = virbr0\nNETWORK_SIZE = C\nNETWORK_ADDRESS = $NET.0\nGATEWAY = $NET.1\nDNS = $NET.1\nLOAD_BALANCER = $NET.3\nVN_MAD = dummy\n" > /var/tmp/example.net
+onevnet create /var/tmp/example.net
+onevnet addar example --ip $NET.100 --size 100
+
+# Template
+onetemplate create --name "ttylinux" --memory 128 --cpu 1 --disk oneadmin[ttylinux] --nic oneadmin[example] --vnc --vnc-password meta --vnc-listen 0.0.0.0
+onetemplate chmod ttylinux 666
+
+# Host
+su - oneadmin -c "cat ~/.ssh/id_dsa.pub >> ~/.ssh/authorized_keys"
+su - oneadmin -c "ssh-keyscan -t ecdsa,rsa,dsa $HOSTNAME >> ~/.ssh/known_hosts"
+onehost create $HOSTNAME -i kvm -v kvm
+
+
+# ?? systemctl restart opennebula
