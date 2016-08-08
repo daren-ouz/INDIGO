@@ -47,16 +47,18 @@ grep -q 'TYPE           = "qemu"' /etc/one/oned.conf || echo "no hit by previous
 systemctl stop firewalld || echo -n
 systemctl mask firewalld || echo -n
 
+#Restart services
 systemctl enable opennebula
 systemctl start opennebula
 systemctl status opennebula
-systemctl enable opennebula-sunstone
-systemctl start opennebula-sunstone
-systemctl status opennebula-sunstone
 
 echo "Waiting ONe to settle"
 for i in `seq 120`; do oneuser list 2>/dev/null 1>&2 && break; echo -n .; sleep 1; done
 su  oneadmin -c "oneuser list"
+
+systemctl enable opennebula-sunstone
+systemctl start opennebula-sunstone
+systemctl status opennebula-sunstone
 
 # change oneadmin's password
 su  oneadmin -c "oneuser passwd oneadmin 'opennebula'"
@@ -98,7 +100,7 @@ onetemplate create --name "ttylinux" --memory 128 --cpu 1 --disk oneadmin[ttylin
 onetemplate chmod ttylinux 666
 
 # Host
-su - oneadmin -c "cat ~/.ssh/id_dsa.pub >> ~/.ssh/authorized_keys"
+su - oneadmin -c "cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys"
 su - oneadmin -c "ssh-keyscan -t ecdsa,rsa,dsa $HOSTNAME >> ~/.ssh/known_hosts"
 onehost create $HOSTNAME -i kvm -v kvm
 
