@@ -34,7 +34,7 @@ yum install -y opennebula-server opennebula-sunstone
 yum -y install gcc mysql-devel ruby-devel rubygems libcurl-devel gcc-c++ sqlite-devel
 echo "1
 
-" | /usr/share/one/install_gems
+" | /usr/share/one/install_gems || echo -n
 
 # Configure Sunstone & ONe
 sed -i 's/:host: 127.0.0.1/:host: 0.0.0.0/' /etc/one/sunstone-server.conf
