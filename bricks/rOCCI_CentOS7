@@ -20,10 +20,23 @@ yum install -y yum-plugin-priorities
 
 #cd /etc/yum.repos.d
 #wget http://repository.egi.eu/community/software/rocci.server/1.1.x/releases/repofiles/sl-6-x86_64.repo
-# XXX: get sl7 version of RPM
-cd /tmp
-wget http://home.zcu.cz/~mulac/indigo/occi-server-1.1.7+20160201214854-1.el7.x86_64.rpm
-yum install -y occi-server-1.1.7+20160201214854-1.el7.x86_64.rpm
+#cd /tmp
+#wget http://home.zcu.cz/~mulac/indigo/occi-server-1.1.7+20160201214854-1.el7.x86_64.rpm
+#yum install -y occi-server-1.1.7+20160201214854-1.el7.x86_64.rpm
+
+#cat >/etc/yum.repos.d/indigo1-base.repo <<EOF
+#[INDIGO-1-base]
+#name=INDIGO-1 - Base
+#baseurl=http://repo.indigo-datacloud.eu/repository/indigo/1/centos7/$basearch/base
+#protect=1
+#enabled=1
+## To use priorities you must have yum-priorities installed
+#priority=40
+#gpgcheck=1
+#gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-indigodc
+#EOF
+
+yum install -y occi-server
 
 if ( ! grep "Listen\s*11443" /etc/httpd/conf/httpd.conf); then \
 echo Listen 11443 >> /etc/httpd/conf/httpd.conf; fi
