@@ -62,7 +62,7 @@ Listen 9443
             ProxyPass  http://localhost:9869/
             ProxyPassReverse  http://localhost:9869/
         </Location>
-</VirtualHost
+</VirtualHost>
 EOF
 
 systemctl enable opennebula
