@@ -24,7 +24,7 @@ yum install -y yum-plugin-priorities
 #wget http://home.zcu.cz/~mulac/indigo/occi-server-1.1.7+20160201214854-1.el7.x86_64.rpm
 #yum install -y occi-server-1.1.7+20160201214854-1.el7.x86_64.rpm
 
-yum install -y http://repo.indigo-datacloud.eu/repository/indigo/1/centos7/x86_64/base/indigodc-release-1.0.0-1.el7.centos.noarch.rpm
+yum install -y http://repo.indigo-datacloud.eu/repository/indigo/1/centos7/x86_64/base/indigodc-release-1.0.0-1.el7.centos.noarch.rpm || echo -n
 yum install -y occi-server
 
 if ( ! grep "Listen\s*11443" /etc/httpd/conf/httpd.conf); then \
