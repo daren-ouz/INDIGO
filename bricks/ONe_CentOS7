@@ -45,6 +45,25 @@ sed -i 's/"kvm" ]/"qemu" ]/' /etc/one/oned.conf
 systemctl stop firewalld || echo -n
 systemctl mask firewalld || echo -n
 
+# Sunstone proxy stub
+cat >/etc/httpd/conf.d/sunstone-ssl-proxy.conf_not_used <<EOF
+# To use: add certificate/key, enable port in FW, rename this stub and restart httpd
+Listen 9443
+<VirtualHost *:9443>
+#        ServerName OPTIONAL
+        SSLEngine On
+        SSLVerifyDepth 3
+        SSLCertificateFile /etc/grid-security/hostcert.pem
+        SSLCertificateKeyFile /etc/grid-security/hostkey.pem
+        SSLCACertificatePath /etc/grid-security/certificates
+
+        <Location />
+            ProxyPass  http://localhost:9869/
+            ProxyPassReverse  http://localhost:9869/
+        </Location>
+</VirtualHost
+EOF
+
 systemctl enable opennebula
 systemctl start opennebula
 systemctl enable opennebula-sunstone
