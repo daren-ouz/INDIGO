@@ -30,7 +30,7 @@ wget https://github.com/indigo-dc/onedock/releases/download/1.0-2/onedock-master
 rpm -i onedock-master-1.0-2.noarch.rpm --replacefiles
 service opennebula restart
 
-# XXX: remove duplicata lines
+# XXX: remove wrong/duplicate lines
 sed -i '/Cmnd_Alias ONEDOCK.*/d' /etc/sudoers.d/opennebula
 # add correct record
 # XXX: use /var/lib/one/remotes/docker-manage-network (wiki says /var/tmp/one/docker-manage-network)
@@ -53,6 +53,13 @@ oneuser list
 wget https://github.com/indigo-dc/onedock/releases/download/1.0-2/onedock-node-1.0-2.noarch.rpm
 rpm -i onedock-node-1.0-2.noarch.rpm
 # XXX: the RPM does nothing?? is it needed?
+
+# XXX: remove wrong/duplicate lines
+sed -i '/Cmnd_Alias ONEDOCK.*/d' /etc/sudoers.d/opennebula
+# add correct record
+# XXX: use /var/lib/one/remotes/docker-manage-network (wiki says /var/tmp/one/docker-manage-network)
+echo "Cmnd_Alias ONEDOCK = /var/lib/one/remotes/docker-manage-network,    /usr/bin/qemu-nbd, /sbin/losetup, /bin/mount" >>/etc/sudoers.d/opennebula
+
 
 # Create ONe infrastructure for onedock
 #
