@@ -25,6 +25,7 @@ cd /var/tmp
 # Download components
 for i in $BRICKS; do
 	echo "Downloading $i installator"
+	rm -f ${i}_${OS} 2>/dev/null
 	wget ${GIT}/bricks/${i}_${OS}
 done
 
