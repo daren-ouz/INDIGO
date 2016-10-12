@@ -1,0 +1,71 @@
+#######################################################
+# ONe node 
+
+# Dissable SELinux
+sed -i 's/^SELINUX=.*/SELINUX=disabled/' /etc/sysconfig/selinux
+setenforce 0 || echo -n
+
+# Add repo
+yum install -y epel-release
+cat << EOT > /etc/yum.repos.d/opennebula.repo
+[opennebula]
+name=opennebula
+baseurl=http://downloads.opennebula.org/repo/4.14/CentOS/7/x86_64/
+enabled=1
+gpgcheck=0
+EOT
+
+yum install -y opennebula-node-kvm
+systemctl enable libvirtd.service
+systemctl start libvirtd.service
+
+# SSH
+echo 'SERVER: su oneadmin -c "cat ~/.ssh/id_dsa.pub"'
+echo 'NODE: su oneadmin -c "mkdir ~/.ssh; vi ~/.ssh/authorized_keys"'
+echo 'SERVER: su oneadmin -c "scp -rp /var/lib/one/.ssh NODE:/var/lib/one/"'
+
+# Adding host to ONe
+echo 'SERVER: su oneadmin -c "onehost create NODE -i kvm -v kvm -n dummy"'
+echo 'SERVER: GUI -> templates -> update -> scheduling -> hosts -> add created host to ONe template(ttylinux)'
+
+# Changing datastore type to ssh (no NFS needed)
+echo 'SERVER: Change TM_MAD shared for ssh'
+echo 'SERVER: su oneadmin -c "onedatastore update 0"'
+echo 'SERVER: su oneadmin -c "onedatastore update 1"'
+
+#######################################################
+# ONEDock node
+
+# restart rpcbind service, just for sure
+systemctl restart rpcbind
+
+cd /var/tmp
+wget https://github.com/indigo-dc/onedock/raw/master/install/centos/install-docker
+bash install-docker
+usermod -aG docker oneadmin
+
+cp /tmp/domain.crt /etc/pki/ca-trust/source/anchors/
+update-ca-trust extract
+service docker restart
+
+yum -y install jq xmlstarlet
+
+yum install -y wget
+wget https://github.com/indigo-dc/onedock/releases/download/1.0-2/onedock-node-1.0-2.noarch.rpm
+rpm -i onedock-node-1.0-2.noarch.rpm
+
+su oneadmin -c "scp oneadmin@one01.ncg.ingrid.pt:/var/lib/docker-registry/certs/domain.crt /tmp"
+cp /tmp/domain.crt /etc/pki/ca-trust/source/anchors/
+update-ca-trust extract
+service docker restart
+#mkdir -p /etc/docker/certs.d/SERVER:5000
+#cp /tmp/domain.crt /etc/docker/certs.d/SERVER:5000
+
+echo 'SERVER: echo "NODE-IP NODE-DOCKER-NAME" >>/etc/hosts'
+echo 'SERVER: su oneadmin -c "onehost create NODE-DOCKER-NAME -i onedock -v onedock -n dummy"'
+echo 'SERVER: GUI -> templates -> update -> scheduling -> hosts -> add created host to ONe template(onedock)'
+echo 'SERVER: open port 5000 (docker registry)'
+echo 'NODE: add --insecure-registry SERVER:5000 to /usr/lib/systemd/system/docker.service ExecStart line'
+systemctl daemon-reload
+service docker restart
+
