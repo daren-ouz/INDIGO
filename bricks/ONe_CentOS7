@@ -110,11 +110,30 @@ printf "NAME = example\nTYPE = RANGED\nBRIDGE = virbr0\nNETWORK_SIZE = C\nNETWOR
 onevnet create /var/tmp/example.net
 onevnet addar example --ip $NET.100 --size 100
 
-# Template
-onetemplate create --name "ttylinux" --memory 128 --cpu 1 --disk oneadmin[ttylinux] --nic oneadmin[example] --vnc --vnc-password meta --vnc-listen 0.0.0.0
-onetemplate chmod ttylinux 666
-
 # Host
 su - oneadmin -c "cat ~/.ssh/id_dsa.pub >> ~/.ssh/authorized_keys"
 su - oneadmin -c "ssh-keyscan -t ecdsa,rsa,dsa $HOSTNAME >> ~/.ssh/known_hosts"
-onehost create $HOSTNAME -i kvm -v kvm -n dummy
+ID=`onehost create $HOSTNAME -i kvm -v kvm -n dummy`
+
+# Template
+#onetemplate create --name "ttylinux" --memory 128 --cpu 1 --disk oneadmin[ttylinux] --nic oneadmin[example] --vnc --vnc-password meta --vnc-listen 0.0.0.0
+cat >/var/tmp/example.template <<EOF
+NAME=ttylinux
+MEMORY=128
+CPU=1
+DISK=[
+  IMAGE="ttylinux",
+  IMAGE_UNAME="oneadmin" ]
+NIC=[
+  NETWORK="example",
+  NETWORK_UNAME="oneadmin" ]
+GRAPHICS=[
+  LISTEN="0.0.0.0",
+  PASSWD="meta",
+  TYPE="vnc" ]
+SCHED_REQUIREMENTS="ID=\"${ID/ID: /}\""
+EOF
+onetemplate create /var/tmp/example.templdeleate
+onetemplate chmod ttylinux 666
+
+

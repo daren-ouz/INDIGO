@@ -102,8 +102,27 @@ su oneadmin -c "onevnet create /var/tmp/docker-private.net"
 
 # Create host
 echo "127.0.0.1 onedock-test" >> /etc/hosts
-su oneadmin -c "onehost create onedock-test -i onedock -v onedock -n dummy"
+ID=`su oneadmin -c "onehost create onedock-test -i onedock -v onedock -n dummy"`
 
 # Create template
-onetemplate create --name "onedock-ubuntu-sshd" --memory 128 --cpu 1 --disk oneadmin[ubuntu] --nic oneadmin[private] --vnc --vnc-password onedock --vnc-listen 0.0.0.0 --net_context
+#onetemplate create --name "onedock-ubuntu-sshd" --memory 128 --cpu 1 --disk oneadmin[ubuntu] --nic oneadmin[private] --vnc --vnc-password onedock --vnc-listen 0.0.0.0 --net_context
+cat >/var/tmp/onedock.template <<EOF
+NAME="onedock-ubuntu-sshd"
+MEMORY=128
+CPU=1
+DISK=[
+  IMAGE="ubuntu",
+  IMAGE_UNAME="oneadmin" ]
+NIC=[
+  NETWORK="private",
+  NETWORK_UNAME="oneadmin" ]
+CONTEXT=[
+  NETWORK="YES" ]
+GRAPHICS=[
+  LISTEN="0.0.0.0",
+  PASSWD="onedock",
+  TYPE="vnc" ]
+SCHED_REQUIREMENTS="ID=\"${ID/ID: /}\""
+EOF
+onetemplate create /var/tmp/onedock.template
 su oneadmin -c "onetemplate chmod onedock-ubuntu-sshd 666"
