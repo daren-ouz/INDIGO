@@ -133,7 +133,7 @@ GRAPHICS=[
   TYPE="vnc" ]
 SCHED_REQUIREMENTS="ID=\"${ID/ID: /}\""
 EOF
-onetemplate create /var/tmp/example.templdeleate
+onetemplate create /var/tmp/example.template
 onetemplate chmod ttylinux 666
 
 
