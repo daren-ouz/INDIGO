@@ -87,6 +87,7 @@ EOF
 su oneadmin -c "oneimage create -d onedock /var/tmp/ubuntu-docker.tmpl"
 while [ "`oneimage list| grep onedock| grep lock`" ]; do echo -n .; sleep 1; done
 # check status, in case of err try use '127.0.0.1 HOSTNAME' instead of 'IP HOSTNAME' in /etc/hosts
+su oneadmin -c "oneimage chmod ubuntu 666"
 
 # Create network
 cat > docker-private.net << EOF
