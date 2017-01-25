@@ -20,6 +20,7 @@ sed -i 's/^SELINUX=.*/SELINUX=disabled/' /etc/sysconfig/selinux
 setenforce 0 || echo -n
 
 # Add repo
+yum update -y
 yum install -y epel-release
 cat << EOT > /etc/yum.repos.d/opennebula.repo
 [opennebula]
@@ -105,4 +106,4 @@ su - oneadmin -c "ssh-keyscan -t ecdsa,rsa,dsa $HOSTNAME >> ~/.ssh/known_hosts"
 onehost create $HOSTNAME -i kvm -v kvm
 
 
-# ?? systemctl restart opennebula
+systemctl restart opennebula
