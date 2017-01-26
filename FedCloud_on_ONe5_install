@@ -14,7 +14,7 @@ trap 'ER=$?; echo;echo; echo "ERROR during installation!";echo; echo; exit $ER' 
 
 
 DESC="FedCloud on ONe5 testbed"
-BRICKS="ONe5"
+BRICKS="ONe5 rOCCI"
 #BRICKS="ONe rOCCI perun oneacct BDII"
 OS=CentOS7
 GIT=https://raw.githubusercontent.com/daren-ouz/INDIGO/master
