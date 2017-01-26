@@ -106,4 +106,9 @@ su - oneadmin -c "ssh-keyscan -t ecdsa,rsa,dsa $HOSTNAME >> ~/.ssh/known_hosts"
 onehost create $HOSTNAME -i kvm -v kvm
 
 
+# restart ONe
+echo
+echo -n "Restarting ONe"
 systemctl restart opennebula
+#give ONe some time to settle
+until oneimage list &>/dev/null; do echo -n .; sleep 1; done
