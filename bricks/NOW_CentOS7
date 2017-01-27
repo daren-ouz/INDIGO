@@ -1,0 +1,36 @@
+# This is a script for NOW (https://github.com/CESNET/NOW) installation
+# It is supposed to run in CentOS 7 environment.
+#
+# Copyright 2015 CESNET - INDIGO-DataCloud
+#
+#!/bin/bash
+
+
+cd /var/tmp
+rm *.rpm
+wget --no-check-certificate https://emian.zcu.cz:8443/jenkins/view/indigo/job/NOW/network=ipv4,platform=epel-7-x86_64/lastSuccessfulBuild/artifact/results/NOW-0.0.1-0.20161027gite52b36e.noarch.rpm
+
+#wget --no-check-certificate https://emian.zcu.cz:8443/jenkins/view/indigo/job/third-party/network=ipv4,platform=epel-7-x86_64/lastSuccessfulBuild/artifact/latest.repo -O jenkins_now_third_party.repo
+
+yum install NOW-0.0.1-0.20161027gite52b36e.noarch.rpm
+
+# az bude chodit to repo, tak tohle nebude treba
+wget --no-check-certificate https://emian.zcu.cz:8443/jenkins/view/indigo/job/third-party/network=ipv4,platform=epel-7-x86_64/lastSuccessfulBuild/artifact/results/rubygem-tilt-2.0.4-1.el7.centos.noarch.rpm
+wget --no-check-certificate https://emian.zcu.cz:8443/jenkins/view/indigo/job/third-party/network=ipv4,platform=epel-7-x86_64/lastSuccessfulBuild/artifact/results/rubygem-ipaddress-0.8.3-1.el7.centos.noarch.rpm
+wget --no-check-certificate https://emian.zcu.cz:8443/jenkins/view/indigo/job/third-party/network=ipv4,platform=epel-7-x86_64/lastSuccessfulBuild/artifact/results/rubygem-sinatra-1.4.7-1.el7.centos.noarch.rpm
+wget --no-check-certificate https://emian.zcu.cz:8443/jenkins/view/indigo/job/third-party/network=ipv4,platform=epel-7-x86_64/lastSuccessfulBuild/artifact/results/rubygem-sinatra-cross_origin-0.3.2-2.el7.centos.noarch.rpm
+yum install *.rpm
+
+systemctl enable httpd
+service httpd restart
+
+oneuser create nowadmin --driver server_cipher 'the-best-strongest-password-ever'
+oneuser chgrp nowadmin oneadmin
+
+onegroup create --name nowadmin --resources NET
+groupid='@100'
+zone='#0'
+oneacl create "${groupid} NET/* MANAGE+ADMIN ${zone}"
+oneacl create "${groupid} CLUSTER/* ADMIN ${zone}"
+oneacl create "${groupid} USER/* MANAGE ${zone}"
+oneuser addgroup nowadmin nowadmin

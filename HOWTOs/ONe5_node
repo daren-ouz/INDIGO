@@ -1,0 +1,40 @@
+# Dissable SELinux
+sed -i 's/^SELINUX=.*/SELINUX=disabled/' /etc/sysconfig/selinux
+setenforce 0 || echo -n
+
+
+# Add repo
+yum update -y
+yum install -y epel-release
+cat << EOT > /etc/yum.repos.d/opennebula.repo
+[opennebula]
+name=opennebula
+baseurl=http://downloads.opennebula.org/repo/4.14/CentOS/7/x86_64/
+enabled=1
+gpgcheck=0
+EOT
+
+yum install -y opennebula-node-kvm
+systemctl enable libvirtd.service
+systemctl start libvirtd.service
+
+# hostname
+echo 'NODE: hostname NODE; hostname >/etc/hostname; ping -c 1 `hostname`| grep PING"
+echo 'SERVER: echo "IP NODE">>/etc/hosts'
+
+# SSH
+echo 'SERVER: su oneadmin -c "cat ~/.ssh/id_rsa.pub"'
+echo 'NODE: su oneadmin -c "mkdir ~/.ssh; vi ~/.ssh/authorized_keys"'
+echo 'SERVER: su oneadmin -c "scp -rp /var/lib/one/.ssh NODE:/var/lib/one/"'
+
+# Adding host to ONe
+echo 'SERVER: su oneadmin -c "onehost create NODE -i kvm -v kvm"'
+#echo 'SERVER: GUI -> templates -> update -> scheduling -> hosts -> add created host to ONe template(ttylinux)'
+
+# Changing datastore type to ssh (no NFS needed)
+#echo 'SERVER: Change TM_MAD shared for ssh'
+#echo 'SERVER: su oneadmin -c "onedatastore update 0"'
+#echo 'SERVER: su oneadmin -c "onedatastore update 1"'
+
+# Restart ONe
+echo 'SERVER: echo -n "Restarting ONe"; systemctl restart opennebula; until oneimage list &>/dev/null; do echo -n .; sleep 1; done'
