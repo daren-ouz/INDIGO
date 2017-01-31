@@ -1,1 +1,9 @@
-If necessary, after VM creation and before appliance installation set hostname to name registered in DNS. 
+- if necessary, after VM creation and before appliance installation set hostname to name registered in DNS. 
+
+- adding full-featured server cert:
+ - cp host cert/key to /etc/gridsecurity/host{cert,key}.pem
+ - cp CA cert to /etc/gridsecurity/certificates
+ - ln CA cert hash to CA cert:
+   ln -s CA.crt `openssl x509 -hash -noout < CA.crt`
+ - check certs paths in /etc/httpd/conf.d/occi-ssl.conf
+
