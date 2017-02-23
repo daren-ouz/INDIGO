@@ -4,6 +4,7 @@ In this reporitory, CESNET appliances created in INDIGO project are stored. Ther
 
 ---
 
+
 ## ONEDock_testbed_install
 
 ONEDock testbed appliance on CentOS 7. 
@@ -47,8 +48,8 @@ power_state:
 
 FedCloud appliance on CentOS 7. 
 
-- bricks    : ONe5
-- in progress : rOCCI, Perun, oneacct, BDII, vmcatcher
+- bricks    : ONe5, rOCCI
+- in progress : Perun, oneacct, BDII, vmcatcher
 
 Supposed to be run via cloudinit as:
 
