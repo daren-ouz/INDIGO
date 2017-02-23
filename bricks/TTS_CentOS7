@@ -1,0 +1,69 @@
+# This is a script for TTS (https://indigo-dc.gitbooks.io/token-translation-service/) installation
+# It is supposed to run in CentOS 7 environment.
+#
+# Copyright 2015 CESNET - INDIGO-DataCloud
+#
+#!/bin/bash
+
+# assumes INDIGO repository added 
+yum install -y tts
+
+cp /etc/tts/main.conf /etc/tts/main.conf.orig
+cat >/etc/tts/main.conf <<EOF
+HostName = `hostname`
+SSL = true
+ListenPort = 8443
+Port = 443
+# DebugMode = true
+CaCertFile = /etc/grid-security/certificates/TO-BE-FILLED-IN
+CertFile = /etc/grid-security/hostcert.pem
+KeyFile = /etc/tts/hostkey.pem
+ServiceConfigPath = /etc/tts/services
+OidcConfigPath = /etc/tts/oidc
+IDHScript = /var/lib/tts/idh/basic-idh.py
+SqliteFile = /var/lib/tts/tts.db
+EOF
+
+iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 443 -j REDIRECT --to-port 8443
+
+echo "Fill in CaCertFile in /etc/tts/main.conf, check CertFile&KeyFile paths"
+echo
+
+
+cat >/etc/tts/oidc/iam.conf <<EOF
+Id = IAM
+Description = "INDIGO Datacloud Identity and Access Management (IAM)"
+ClientId =
+Secret =
+ConfigEndpoint = https://iam-test.indigo-datacloud.eu/.well-known/openid-configuration
+RequestScopes = openid,profile
+EOF
+
+echo "Fill in ClientId and Secret in /etc/tts/oidc/iam.conf"
+echo
+
+cat >/etc/tts/services/one.conf <<EOF
+Id = opennebula
+Type = opennebula
+Host = `hostname`
+Port = 2633
+Description = "Access to OpenNebula in `hostname`"
+Cmd = /var/lib/tts/plugins/opennebula.py
+ConnectionType = local
+AllowSameState = true
+CredentialLimit = 2
+EOF
+
+cp /etc/grid-security/hostkey.pem /etc/tts
+cd /etc/tts
+chmod 400 hostkey.pem
+chown tts.tts hostkey.pem
+
+onegroup create -n tts_indigo
+echo "Edit SESSIONID nd USERS_GROUP in  /var/lib/tts/plugins/opennebula.py, and recompile"
+echo "vi /var/lib/tts/plugins/opennebula.py"
+echo "cd /var/lib/tts/plugins"
+echo "python -m py_compile opennebula.py"
+
+systemctl enable tts
+systemctl start tts

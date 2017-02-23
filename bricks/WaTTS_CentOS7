@@ -1,0 +1,88 @@
+# This is a script for WaTTS (https://indigo-dc.gitbooks.io/token-translation-service/) installation
+# It is supposed to run in CentOS 7 environment.
+#
+# Copyright 2015 CESNET - INDIGO-DataCloud
+#
+#!/bin/bash
+
+# assumes INDIGO repository added 
+# yum install -y tts
+
+# XXX - dowload nightly build from 
+# https://jenkins.indigo-datacloud.eu:8080/job/tts-packaging/platform=bcentos7/
+cd /var/tmp/
+wget https://jenkins.indigo-datacloud.eu:8080/job/tts-packaging/platform=bcentos7/lastSuccessfulBuild/artifact/RPMS/tts-1.0.0.1f0bcd24-1.el7.centos.x86_64.rpm
+
+
+cp /etc/watts/watts.conf /etc/watts/watts.conf.rpm
+chmod 640 /etc/watts/watts.conf
+
+# general configuration
+#
+cat >/etc/watts/watts.conf <<EOF
+hostname = `hostname`
+port = 443
+listen_port = 8443
+ssl = true
+oidc_ssl.cacertfile = /etc/ssl/certs/ca-bundle.crt 
+EOF
+
+iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 443 -j REDIRECT --to-port 8443
+
+cp /etc/grid-security/hostcert.pem /etc/watts/watts.crt
+cp /etc/grid-security/hostkey.pem /etc/watts/watts.key
+chown tts.tts /etc/watts/watts.key
+chmod 400 /etc/watts/watts.key
+cp /etc/grid-security/certificates/DigiCertCA.crt /etc/watts/cachain.cert
+
+#uncomment if http redirection needed
+#cat >/etc/watts/watts.conf <<EOF
+#redirection.enable = true
+#redirection.listen_port = 8000
+#EOF
+#iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 8000
+
+
+# openid configuration
+#
+cat >/etc/watts/watts.conf <<EOF
+openid.iam.description = INDIGO Datacloud Identity and Access Management (IAM)
+openid.iam.client_id = <insert the client id>
+openid.iam.client_secret =  <insert the client secret>
+openid.iam.config_endpoint = https://iam-test.indigo-datacloud.eu/.well-known/openid-configuration
+openid.iam.request_scopes = openid, profile
+EOF
+
+echo "Fill in ClientId and Secret in /etc/tts/oidc/iam.conf"
+echo
+
+
+# download  and configure ONe plugin
+#
+cd /var/lib/watts/plugins/
+wget https://raw.githubusercontent.com/indigo-dc/tts_plugin_opennebula/watts/plugin/opennebula.py
+chown tts.tts /var/lib/watts/plugins/opennebula.py
+chmod 755 /var/lib/watts/plugins/opennebula.py
+
+ID=`onegroup create -n watts_indigo`
+
+cat >>/etc/watts/watts.conf <<EOF
+
+# ONe plugin configuration
+service.opennebula.description = OpenNebula
+service.opennebula.cmd = /var/lib/watts/plugins/opennebula.py
+service.opennebula.credential_limit = 2
+service.opennebula.connection.type = local
+service.opennebula.authz.allow.any.sub.any = true
+
+service.opennebula.plugin.sessionid = `cat /var/lib/one/.one/one_auth`
+service.opennebula.plugin.user_group = ${ID/* /}
+#defaults
+#service.opennebula.plugin.api_endpoint = http://localhost:2633/RPC2
+#service.opennebula.plugin.db_file = /tmp/users.db
+#service.opennebula.plugin.user_prefix = watts
+EOF
+
+
+systemctl enable watts
+systemctl start watts
