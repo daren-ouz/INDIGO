@@ -27,7 +27,15 @@ ssl = true
 oidc_ssl.cacertfile = /etc/ssl/certs/ca-bundle.crt 
 EOF
 
+yum instal -s iptables iptables-services
+systemctl enable iptables
+sed -i 's/IPTABLES_SAVE_ON_STOP.*/IPTABLES_SAVE_ON_STOP="yes"/' /etc/sysconfig/iptables-config
+sed -i 's/IPTABLES_SAVE_ON_RESTART.*/IPTABLES_SAVE_ON_RESTART="yes"/' /etc/sysconfig/iptables-config
+
 iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 443 -j REDIRECT --to-port 8443
+
+systemctl restart iptables
+
 
 cp /etc/grid-security/hostcert.pem /etc/watts/watts.crt
 cp /etc/grid-security/hostkey.pem /etc/watts/watts.key
