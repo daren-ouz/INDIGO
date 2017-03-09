@@ -29,6 +29,8 @@ EOF
 
 yum instal -s iptables iptables-services
 systemctl enable iptables
+iptables -D INPUT -j REJECT --reject-with icmp-host-prohibited
+iptables -D FORWARD -j REJECT --reject-with icmp-host-prohibited
 sed -i 's/IPTABLES_SAVE_ON_STOP.*/IPTABLES_SAVE_ON_STOP="yes"/' /etc/sysconfig/iptables-config
 sed -i 's/IPTABLES_SAVE_ON_RESTART.*/IPTABLES_SAVE_ON_RESTART="yes"/' /etc/sysconfig/iptables-config
 
