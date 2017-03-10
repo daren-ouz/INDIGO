@@ -1,0 +1,24 @@
+# This is a script for IM (https://indigo-dc.gitbooks.io/im) installation
+# It is supposed to run in CentOS 7 environment.
+#
+# Copyright 2015 CESNET - INDIGO-DataCloud
+#
+#!/bin/bash
+
+# assumes epel and INDIGO repository added 
+yum install -y IM
+
+
+ln -s /etc/init.d/im /etc/rc2.d/S99im
+ln -s /etc/init.d/im /etc/rc3.d/S99im
+ln -s /etc/init.d/im /etc/rc5.d/S99im
+ln -s /etc/init.d/im /etc/rc1.d/K05im
+ln -s /etc/init.d/im /etc/rc6.d/K05im
+
+sed -i 's/SINGLE_SITE = .*/SINGLE_SITE = True/' /etc/im/im.cfg
+sed -i "s/SINGLE_SITE_AUTH_HOST = .*/SINGLE_SITE_AUTH_HOST = http:\/\/`hostname`:2633/" /etc/im/im.cfg
+sed -i "s/SINGLE_SITE_IMAGE_URL_PREFIX = .*/SINGLE_SITE_IMAGE_URL_PREFIX = one:\/\/`hostname`\//" /etc/im/im.cfg
+sed -i "s/TTS_URL = .*/TTS_URL = https:\/\/`hostname`:8443/" /etc/im/im.cfg
+
+systemctl enable im
+systemctl start im
