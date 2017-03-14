@@ -17,7 +17,7 @@ ln -s /etc/init.d/im /etc/rc6.d/K05im
 
 sed -i 's/SINGLE_SITE = .*/SINGLE_SITE = True/' /etc/im/im.cfg
 sed -i "s/SINGLE_SITE_AUTH_HOST = .*/SINGLE_SITE_AUTH_HOST = http:\/\/`hostname`:2633/" /etc/im/im.cfg
-sed -i "s/SINGLE_SITE_IMAGE_URL_PREFIX = .*/SINGLE_SITE_IMAGE_URL_PREFIX = one:\/\/`hostname`\//" /etc/im/im.cfg
+sed -i "s/SINGLE_SITE_IMAGE_URL_PREFIX = .*/SINGLE_SITE_IMAGE_URL_PREFIX = one:\/\/`hostname`/" /etc/im/im.cfg
 sed -i "s/TTS_URL = .*/TTS_URL = https:\/\/`hostname`:8443/" /etc/im/im.cfg
 
 systemctl enable im
