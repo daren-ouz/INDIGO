@@ -25,7 +25,7 @@ hostname = `hostname`
 port = 443
 listen_port = 8443
 ssl = true
-oidc_ssl.cacertfile = /etc/ssl/certs/ca-bundle.crt 
+oidc.cacertfile = /etc/ssl/certs/ca-bundle.crt 
 EOF
 
 yum instal -s iptables iptables-services
@@ -80,7 +80,7 @@ ID=`onegroup create -n watts_indigo`
 cat >>/etc/watts/watts.conf <<EOF
 
 # ONe plugin configuration
-service.opennebula.description = OpenNebula
+service.opennebula.description = `hostname`
 service.opennebula.cmd = /var/lib/watts/plugins/opennebula.py
 service.opennebula.credential_limit = 2
 service.opennebula.connection.type = local
