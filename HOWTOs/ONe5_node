@@ -9,10 +9,12 @@ yum install -y epel-release
 cat << EOT > /etc/yum.repos.d/opennebula.repo
 [opennebula]
 name=opennebula
-baseurl=http://downloads.opennebula.org/repo/4.14/CentOS/7/x86_64/
+baseurl=http://downloads.opennebula.org/repo/5.2/CentOS/7/x86_64/
 enabled=1
 gpgcheck=0
 EOT
+
+yum install centos-release-qemu-ev
 
 yum install -y opennebula-node-kvm
 systemctl enable libvirtd.service
