@@ -20,5 +20,11 @@ sed -i "s/SINGLE_SITE_AUTH_HOST = .*/SINGLE_SITE_AUTH_HOST = http:\/\/`hostname`
 sed -i "s/SINGLE_SITE_IMAGE_URL_PREFIX = .*/SINGLE_SITE_IMAGE_URL_PREFIX = one:\/\/`hostname`/" /etc/im/im.cfg
 sed -i "s/TTS_URL = .*/TTS_URL = https:\/\/`hostname`:8443/" /etc/im/im.cfg
 
+# Enable SSL
+sed -i 's!REST_SSL = False!REST_SSL = True!' /etc/im/im.cfg
+sed -i 's!^REST_SSL_KEYFILE.*!REST_SSL_KEYFILE  = /etc/grid-security/hostkey.pem!' /etc/im/im.cfg
+sed -i 's!^REST_SSL_CERTFILE.*!REST_SSL_CERTFILE = /etc/grid-security/hostcert.pem!' /etc/im/im.cfg
+sed -i 's!^REST_SSL_CA_CERTS.*!REST_SSL_CA_CERTS = /etc/grid-security/certificates/DigiCertCA.crt!' /etc/im/im.cfg
+
 systemctl enable im
 systemctl start im
