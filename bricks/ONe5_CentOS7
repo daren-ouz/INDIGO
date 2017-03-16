@@ -25,15 +25,19 @@ yum install -y epel-release
 cat << EOT > /etc/yum.repos.d/opennebula.repo
 [opennebula]
 name=opennebula
-baseurl=http://downloads.opennebula.org/repo/5.0/CentOS/7/x86_64/
+baseurl=http://downloads.opennebula.org/repo/5.2/CentOS/7/x86_64/
 enabled=1
 gpgcheck=0
 EOT
+
+# QEMU Enterprise Virtualization packages from the CentOS
+yum -y install centos-release-qemu-ev
 
 # Install packages
 yum -y install opennebula-server opennebula-sunstone opennebula-ruby opennebula-gate opennebula-flow
 yum -y install ruby-devel gcc mysql-devel gcc-c++ libcurl-devel sqlite-devel
 #yum -y install gcc mysql-devel ruby-devel rubygems libcurl-devel gcc-c++ sqlite-devel
+PATH=$PATH:/usr/local/bin/
 echo "1
 
 " | /usr/share/one/install_gems
