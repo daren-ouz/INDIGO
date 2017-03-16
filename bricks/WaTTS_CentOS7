@@ -83,6 +83,7 @@ cat >>/etc/watts/watts.conf <<EOF
 service.opennebula.description = `hostname`
 service.opennebula.cmd = /var/lib/watts/plugins/opennebula.py
 service.opennebula.credential_limit = 2
+service.opennebula.allow_same_state = true
 service.opennebula.connection.type = local
 service.opennebula.authz.allow.any.sub.any = true
 
