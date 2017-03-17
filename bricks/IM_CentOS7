@@ -26,5 +26,7 @@ sed -i 's!^REST_SSL_KEYFILE.*!REST_SSL_KEYFILE  = /etc/grid-security/hostkey.pem
 sed -i 's!^REST_SSL_CERTFILE.*!REST_SSL_CERTFILE = /etc/grid-security/hostcert.pem!' /etc/im/im.cfg
 sed -i 's!^REST_SSL_CA_CERTS.*!REST_SSL_CA_CERTS = /etc/grid-security/certificates/DigiCertCA.crt!' /etc/im/im.cfg
 
+yum install -y pyOpenSSL
+
 systemctl enable im
 systemctl start im
