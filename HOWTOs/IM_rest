@@ -1,0 +1,20 @@
+/tmp/token - token from WaTTS (show token)
+/tmp/radl - basic radl:
+
+network example (outbound = 'no')
+system small_node (
+   cpu.arch = 'x86_64' and
+   cpu.count = 1 and
+   memory.size >= 512M and
+   net_interface.0.connection = 'example' and
+   disk.0.os.name = 'linux' and
+   disk.0.os.credentials.username = 'ubuntu' and
+   disk.0.os.credentials.password = 'password' and
+   disk.0.image.url = 'one://one5.ncg.ingrid.pt/0'
+)
+deploy small_node 1
+
+
+curl  -H "Authorization: Bearer `cat /tmp/token`" -H "Content-Type: text/plain" -X POST -d "@/tmp/radl"  https://one5.ncg.ingrid.pt:8800/infrastructures
+curl  -H "Authorization: Bearer `cat /tmp/token`" -H "Content-Type: text/plain" -X GET -d "@/tmp/radl"  https://one5.ncg.ingrid.pt:8800/infrastructures
+curl  -H "Authorization: Bearer `cat /tmp/token`" -H "Content-Type: text/plain" -X DELETE -d "@/tmp/radl"  https://one5.ncg.ingrid.pt:8800/infrastructures/ID
