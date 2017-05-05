@@ -1,0 +1,131 @@
+# This is a script for ONEDock installation.
+# It is supposed to run in CentOS 7 environment.
+#
+# Copyright 2017 CESNET - INDIGO-DataCloud
+#
+# DOCS: https://indigo-dc.gitbooks.io/onedock/content/doc/install-centos.html
+#
+#!/bin/bash
+
+
+################
+# ONEDock server
+
+# restart rpcbind service, just for sure
+systemctl restart rpcbind
+
+cd /var/tmp
+wget https://github.com/indigo-dc/onedock/raw/master/install/centos/install-docker
+bash install-docker
+
+yum install -y docker-registry
+systemctl enable docker-registry.service
+service docker-registry start
+
+wget https://github.com/indigo-dc/onedock/raw/master/install/centos/install-registry
+bash install-registry
+
+yum -y install jq xmlstarlet
+ 
+# XXX - not working now: yum -y install onedock-master
+wget https://github.com/indigo-dc/onedock/releases/download/1.0-2/onedock-master-1.0-2.noarch.rpm
+rpm -i onedock-master-1.0-2.noarch.rpm --replacefiles
+service opennebula restart
+
+# XXX: remove wrong/duplicate lines
+sed -i '/Cmnd_Alias ONEDOCK.*/d' /etc/sudoers.d/opennebula
+# add correct record
+# XXX: use /var/lib/one/remotes/docker-manage-network (wiki says /var/tmp/one/docker-manage-network)
+echo "Cmnd_Alias ONEDOCK = /var/lib/one/remotes/docker-manage-network,    /usr/bin/qemu-nbd, /sbin/losetup, /bin/mount" >>/etc/sudoers.d/opennebula
+
+# XXX: buggy path
+sed -i 's!^SCRIPTS_REMOTE_DIR=.*!SCRIPTS_REMOTE_DIR=/var/lib/one/remotes!'  /etc/one/oned.conf
+
+systemctl restart opennebula
+
+echo "Waiting ONe to settle"
+for i in `seq 120`; do oneuser list 2>/dev/null 1>&2 && break; echo -n .; sleep 1; done
+oneuser list
+
+
+##############
+# ONEDock node
+
+# XXX: yum install -y onedock-node
+wget https://github.com/indigo-dc/onedock/releases/download/1.0-2/onedock-node-1.0-2.noarch.rpm
+rpm -i onedock-node-1.0-2.noarch.rpm
+# XXX: the RPM does nothing?? is it needed?
+
+# XXX: remove wrong/duplicate lines
+sed -i '/Cmnd_Alias ONEDOCK.*/d' /etc/sudoers.d/opennebula
+# add correct record
+# XXX: use /var/lib/one/remotes/docker-manage-network (wiki says /var/tmp/one/docker-manage-network)
+echo "Cmnd_Alias ONEDOCK = /var/lib/one/remotes/docker-manage-network,    /usr/bin/qemu-nbd, /sbin/losetup, /bin/mount" >>/etc/sudoers.d/opennebula
+
+
+# Create ONe infrastructure for onedock
+#
+cd /var/tmp
+
+# Create datastore
+cat > onedock.ds << EOF
+NAME=onedock
+DS_MAD=onedock
+TM_MAD=onedock
+EOF
+su oneadmin -c "onedatastore create /var/tmp/onedock.ds"
+
+# Create image
+# - https://hub.docker.com/r/rastasheep/ubuntu-sshd/
+# - access root/root
+cat > ubuntu-docker.tmpl << EOF
+NAME="ubuntu"
+#PATH=docker://ubuntu:latest
+PATH=docker://rastasheep/ubuntu-sshd
+TYPE=OS
+#DESCRIPTION="Ubuntu"
+DESCRIPTION="Ubuntu Trusty with SSHd"
+EOF
+su oneadmin -c "oneimage create -d onedock /var/tmp/ubuntu-docker.tmpl"
+while [ "`oneimage list| grep onedock| grep lock`" ]; do echo -n .; sleep 1; done
+# check status, in case of err try use '127.0.0.1 HOSTNAME' instead of 'IP HOSTNAME' in /etc/hosts
+su oneadmin -c "oneimage chmod ubuntu 666"
+
+# Create network
+cat > docker-private.net << EOF
+NAME=private
+BRIDGE=docker0
+NETWORK_ADDRESS = "172.17.0.1"
+NETWORK_MASK    = "255.255.0.0"
+DNS             = "172.17.0.1"
+GATEWAY         = "172.17.0.1"
+AR=[TYPE = "IP4", IP = "172.17.10.1", SIZE = "100" ]
+EOF
+su oneadmin -c "onevnet create /var/tmp/docker-private.net"
+
+# Create host
+echo "127.0.0.1 onedock-test" >> /etc/hosts
+ID=`su oneadmin -c "onehost create onedock-test -i onedock -v onedock -n dummy"`
+
+# Create template
+#onetemplate create --name "onedock-ubuntu-sshd" --memory 128 --cpu 1 --disk oneadmin[ubuntu] --nic oneadmin[private] --vnc --vnc-password onedock --vnc-listen 0.0.0.0 --net_context
+cat >/var/tmp/onedock.template <<EOF
+NAME="onedock-ubuntu-sshd"
+MEMORY=128
+CPU=1
+DISK=[
+  IMAGE="ubuntu",
+  IMAGE_UNAME="oneadmin" ]
+NIC=[
+  NETWORK="private",
+  NETWORK_UNAME="oneadmin" ]
+CONTEXT=[
+  NETWORK="YES" ]
+GRAPHICS=[
+  LISTEN="0.0.0.0",
+  PASSWD="onedock",
+  TYPE="vnc" ]
+SCHED_REQUIREMENTS="ID=\"${ID/ID: /}\""
+EOF
+onetemplate create /var/tmp/onedock.template
+su oneadmin -c "onetemplate chmod onedock-ubuntu-sshd 666"
