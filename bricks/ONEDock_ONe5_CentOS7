@@ -54,10 +54,21 @@ oneuser list
 ##############
 # ONEDock node
 
-# XXX: yum install -y onedock-node
-wget https://github.com/indigo-dc/onedock/releases/download/1.0-2/onedock-node-1.0-2.noarch.rpm
-rpm -i onedock-node-1.0-2.noarch.rpm
-# XXX: the RPM does nothing?? is it needed?
+yum install -y wget
+cd /etc/yum.repos.d/
+wget http://repo.indigo-datacloud.eu/repos/2/indigo2.repo
+rpm --import http://repo.indigo-datacloud.eu/repository/RPM-GPG-KEY-indigodc
+yum update -y --skip-broken
+
+cd /var/tmp
+wget https://github.com/indigo-dc/onedock/raw/master/install/centos/install-docker
+bash install-docker
+
+yum install -y onedock-node
+
+#wget https://github.com/indigo-dc/onedock/releases/download/1.0-2/onedock-node-1.0-2.noarch.rpm
+#rpm -i onedock-node-1.0-2.noarch.rpm
+
 
 # XXX: remove wrong/duplicate lines
 sed -i '/Cmnd_Alias ONEDOCK.*/d' /etc/sudoers.d/opennebula
