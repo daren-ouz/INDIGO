@@ -19,17 +19,20 @@ wget https://github.com/indigo-dc/onedock/raw/master/install/centos/install-dock
 bash install-docker
 
 yum install -y docker-registry
-systemctl enable docker-registry.service
-service docker-registry start
+#systemctl enable docker-registry.service
+#service docker-registry start
+systemctl enable docker-distribution
+service docker-distribution start
 
 wget https://github.com/indigo-dc/onedock/raw/master/install/centos/install-registry
 bash install-registry
 
 yum -y install jq xmlstarlet
  
-# XXX - not working now: yum -y install onedock-master
-wget https://github.com/indigo-dc/onedock/releases/download/1.0-2/onedock-master-1.0-2.noarch.rpm
-rpm -i onedock-master-1.0-2.noarch.rpm --replacefiles
+#XXX: still not working yum -y install onedock-master
+cd /var/tmp
+wget wget https://github.com/indigo-dc/onedock/releases/download/v1.1/onedock-master-1.1-1.noarch.rpm
+rpm -i onedock-master-1.1-1.noarch.rpm --replacefiles
 service opennebula restart
 
 # XXX: remove wrong/duplicate lines
