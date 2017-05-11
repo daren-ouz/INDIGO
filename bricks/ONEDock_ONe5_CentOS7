@@ -114,12 +114,13 @@ NETWORK_MASK    = "255.255.0.0"
 DNS             = "172.17.0.1"
 GATEWAY         = "172.17.0.1"
 AR=[TYPE = "IP4", IP = "172.17.10.1", SIZE = "100" ]
+VN_MAD = "dummy"
 EOF
 su oneadmin -c "onevnet create /var/tmp/docker-private.net"
 
 # Create host
 echo "127.0.0.1 onedock-test" >> /etc/hosts
-ID=`su oneadmin -c "onehost create onedock-test -i onedock -v onedock -n dummy"`
+ID=`su oneadmin -c "onehost create onedock-test -i onedock -v onedock"`
 
 # Create template
 #onetemplate create --name "onedock-ubuntu-sshd" --memory 128 --cpu 1 --disk oneadmin[ubuntu] --nic oneadmin[private] --vnc --vnc-password onedock --vnc-listen 0.0.0.0 --net_context
