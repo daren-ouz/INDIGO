@@ -18,3 +18,6 @@ deploy small_node 1
 curl  -H "Authorization: Bearer `cat /tmp/token`" -H "Content-Type: text/plain" -X POST -d "@/tmp/radl"  https://one5.ncg.ingrid.pt:8800/infrastructures
 curl  -H "Authorization: Bearer `cat /tmp/token`" -H "Content-Type: text/plain" -X GET -d "@/tmp/radl"  https://one5.ncg.ingrid.pt:8800/infrastructures
 curl  -H "Authorization: Bearer `cat /tmp/token`" -H "Content-Type: text/plain" -X DELETE -d "@/tmp/radl"  https://one5.ncg.ingrid.pt:8800/infrastructures/ID
+
+# in case ONe/IM states mismatch
+# service im stop; rm /etc/im/inf.dat; service im start
