@@ -160,5 +160,6 @@ su oneadmin -c "onetemplate chmod $$TEMPLATE_NAME 666"
 su oneadmin -c "onecluster create $CLUSTER_NAME"
 su oneadmin -c "onecluster addhost $CLUSTER_NAME $HOST_NAME"
 su oneadmin -c "onecluster adddatastore $CLUSTER_NAME $DATASTORE_NAME"
+su oneadmin -c "onecluster adddatastore $CLUSTER_NAME system"
 su oneadmin -c "onecluster addvnet $CLUSTER_NAME $VNET_NAME"
 
