@@ -19,6 +19,7 @@ sed -i 's/SINGLE_SITE = .*/SINGLE_SITE = True/' /etc/im/im.cfg
 sed -i "s/SINGLE_SITE_AUTH_HOST = .*/SINGLE_SITE_AUTH_HOST = http:\/\/`hostname`:2633/" /etc/im/im.cfg
 sed -i "s/SINGLE_SITE_IMAGE_URL_PREFIX = .*/SINGLE_SITE_IMAGE_URL_PREFIX = one:\/\/`hostname`/" /etc/im/im.cfg
 sed -i "s/TTS_URL = .*/TTS_URL = https:\/\/`hostname`:8443/" /etc/im/im.cfg
+sed -i 's/TEMPLATE_CONTEXT =.*/TEMPLATE_CONTEXT = NETWORK="YES"/' /etc/im/im.cfg
 
 # Enable SSL
 sed -i 's!REST_SSL = False!REST_SSL = True!' /etc/im/im.cfg
