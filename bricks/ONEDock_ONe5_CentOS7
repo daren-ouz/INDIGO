@@ -80,34 +80,43 @@ echo "Cmnd_Alias ONEDOCK = /var/lib/one/remotes/docker-manage-network,    /usr/b
 # Create ONe infrastructure for onedock
 #
 cd /var/tmp
+DATASTORE_NAME=onedock
+TEMPLETE_NAME=onedock-ubuntu-sshd
+CLUSTER_NAME=onedock
+IMAGE_NAME=ubuntu
+VNET_NAME=private
+HOST_NAME=onedock-test
+
 
 # Create datastore
 cat > onedock.ds << EOF
-NAME=onedock
+NAME=$DATASTORE_NAME
 DS_MAD=onedock
 TM_MAD=onedock
 EOF
 su oneadmin -c "onedatastore create /var/tmp/onedock.ds"
 
+
 # Create image
 # - https://hub.docker.com/r/rastasheep/ubuntu-sshd/
 # - access root/root
 cat > ubuntu-docker.tmpl << EOF
-NAME="ubuntu"
+NAME=$IMAGE_NAME
 #PATH=docker://ubuntu:latest
 PATH=docker://rastasheep/ubuntu-sshd
 TYPE=OS
 #DESCRIPTION="Ubuntu"
 DESCRIPTION="Ubuntu Trusty with SSHd"
 EOF
-su oneadmin -c "oneimage create -d onedock /var/tmp/ubuntu-docker.tmpl"
-while [ "`oneimage list| grep onedock| grep lock`" ]; do echo -n .; sleep 1; done
+su oneadmin -c "oneimage create -d $DATASTORE_NAME /var/tmp/ubuntu-docker.tmpl"
+while [ "`oneimage list| grep $IMAGE_NAME| grep lock`" ]; do echo -n .; sleep 1; done
 # check status, in case of err try use '127.0.0.1 HOSTNAME' instead of 'IP HOSTNAME' in /etc/hosts
-su oneadmin -c "oneimage chmod ubuntu 666"
+su oneadmin -c "oneimage chmod $IMAGE_NAME 666"
+
 
 # Create network
 cat > docker-private.net << EOF
-NAME=private
+NAME=#VNET_NAME
 BRIDGE=docker0
 NETWORK_ADDRESS = "172.17.0.1"
 NETWORK_MASK    = "255.255.0.0"
@@ -118,21 +127,23 @@ VN_MAD = "dummy"
 EOF
 su oneadmin -c "onevnet create /var/tmp/docker-private.net"
 
+
 # Create host
-echo "127.0.0.1 onedock-test" >> /etc/hosts
-ID=`su oneadmin -c "onehost create onedock-test -i onedock -v onedock"`
+echo "127.0.0.1 $HOST_NAME" >> /etc/hosts
+su oneadmin -c "onehost create $HOST_NAME -i onedock -v onedock"
+
 
 # Create template
 #onetemplate create --name "onedock-ubuntu-sshd" --memory 128 --cpu 1 --disk oneadmin[ubuntu] --nic oneadmin[private] --vnc --vnc-password onedock --vnc-listen 0.0.0.0 --net_context
 cat >/var/tmp/onedock.template <<EOF
-NAME="onedock-ubuntu-sshd"
+NAME=$TEMPLATE_NAME
 MEMORY=128
 CPU=1
 DISK=[
-  IMAGE="ubuntu",
+  IMAGE=$IMAGE_NAME,
   IMAGE_UNAME="oneadmin" ]
 NIC=[
-  NETWORK="private",
+  NETWORK=$VNET_NAME,
   NETWORK_UNAME="oneadmin" ]
 CONTEXT=[
   NETWORK="YES" ]
@@ -140,7 +151,14 @@ GRAPHICS=[
   LISTEN="0.0.0.0",
   PASSWD="onedock",
   TYPE="vnc" ]
-SCHED_REQUIREMENTS="ID=\"${ID/ID: /}\""
 EOF
 onetemplate create /var/tmp/onedock.template
-su oneadmin -c "onetemplate chmod onedock-ubuntu-sshd 666"
+su oneadmin -c "onetemplate chmod $$TEMPLATE_NAME 666"
+
+
+# Create cluster
+su oneadmin -c "onecluster create $CLUSTER_NAME"
+su oneadmin -c "onecluster addhost $CLUSTER_NAME $HOST_NAME"
+su oneadmin -c "onecluster adddatastore $CLUSTER_NAME $DATASTORE_NAME"
+su oneadmin -c "onecluster addvnet $CLUSTER_NAME $VNET_NAME"
+
