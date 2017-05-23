@@ -20,4 +20,4 @@ curl  -H "Authorization: Bearer `cat /tmp/token`" -H "Content-Type: text/plain" 
 curl  -H "Authorization: Bearer `cat /tmp/token`" -H "Content-Type: text/plain" -X DELETE -d "@/tmp/radl"  https://one5.ncg.ingrid.pt:8800/infrastructures/ID
 
 # in case ONe/IM states mismatch
-# service im stop; rm /etc/im/inf.dat; service im start
+# systemctl stop im ; rm /etc/im/inf.dat; systemctl start im
