@@ -1,6 +1,7 @@
 /tmp/token - token from WaTTS (show token)
 /tmp/radl - basic radl:
 
+# kvm
 network example (outbound = 'no')
 system small_node (
    cpu.arch = 'x86_64' and
@@ -11,6 +12,20 @@ system small_node (
    disk.0.os.credentials.username = 'ubuntu' and
    disk.0.os.credentials.password = 'password' and
    disk.0.image.url = 'one://one5.ncg.ingrid.pt/0'
+)
+deploy small_node 1
+
+# docker
+network radl_private (outbound = 'no' and provider_id='private')
+system small_node (
+   cpu.arch = 'x86_64' and
+   cpu.count = 1 and
+   memory.size >= 512M and
+   net_interface.0.connection = 'radl_private' and
+   disk.0.os.name = 'linux' and
+   disk.0.os.credentials.username = 'root' and
+   disk.0.os.credentials.password = 'root' and
+   disk.0.image.url = 'one://one5.ncg.ingrid.pt/4'
 )
 deploy small_node 1
 
