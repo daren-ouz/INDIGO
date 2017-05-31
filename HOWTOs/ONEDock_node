@@ -69,3 +69,5 @@ echo 'NODE: add --insecure-registry SERVER:5000 to /usr/lib/systemd/system/docke
 systemctl daemon-reload
 service docker restart
 
+# Kepler
+# https://hub.docker.com/u/indigodatacloud/
