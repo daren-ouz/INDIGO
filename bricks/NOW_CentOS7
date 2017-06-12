@@ -6,20 +6,22 @@
 #!/bin/bash
 
 
-cd /var/tmp
-rm *.rpm
-wget --no-check-certificate https://emian.zcu.cz:8443/jenkins/view/indigo/job/NOW/network=ipv4,platform=epel-7-x86_64/lastSuccessfulBuild/artifact/results/NOW-0.0.1-0.20161027gite52b36e.noarch.rpm
+#cd /var/tmp
+#rm *.rpm
+#wget --no-check-certificate https://emian.zcu.cz:8443/jenkins/view/indigo/job/NOW/network=ipv4,platform=epel-7-x86_64/lastSuccessfulBuild/artifact/results/NOW-0.0.1-0.20161027gite52b36e.noarch.rpm
 
-#wget --no-check-certificate https://emian.zcu.cz:8443/jenkins/view/indigo/job/third-party/network=ipv4,platform=epel-7-x86_64/lastSuccessfulBuild/artifact/latest.repo -O jenkins_now_third_party.repo
+##wget --no-check-certificate https://emian.zcu.cz:8443/jenkins/view/indigo/job/third-party/network=ipv4,platform=epel-7-x86_64/lastSuccessfulBuild/artifact/latest.repo -O jenkins_now_third_party.repo
 
-yum install NOW-0.0.1-0.20161027gite52b36e.noarch.rpm
+y#um install NOW-0.0.1-0.20161027gite52b36e.noarch.rpm
 
-# az bude chodit to repo, tak tohle nebude treba
-wget --no-check-certificate https://emian.zcu.cz:8443/jenkins/view/indigo/job/third-party/network=ipv4,platform=epel-7-x86_64/lastSuccessfulBuild/artifact/results/rubygem-tilt-2.0.4-1.el7.centos.noarch.rpm
-wget --no-check-certificate https://emian.zcu.cz:8443/jenkins/view/indigo/job/third-party/network=ipv4,platform=epel-7-x86_64/lastSuccessfulBuild/artifact/results/rubygem-ipaddress-0.8.3-1.el7.centos.noarch.rpm
-wget --no-check-certificate https://emian.zcu.cz:8443/jenkins/view/indigo/job/third-party/network=ipv4,platform=epel-7-x86_64/lastSuccessfulBuild/artifact/results/rubygem-sinatra-1.4.7-1.el7.centos.noarch.rpm
-wget --no-check-certificate https://emian.zcu.cz:8443/jenkins/view/indigo/job/third-party/network=ipv4,platform=epel-7-x86_64/lastSuccessfulBuild/artifact/results/rubygem-sinatra-cross_origin-0.3.2-2.el7.centos.noarch.rpm
-yum install *.rpm
+## az bude chodit to repo, tak tohle nebude treba
+#wget --no-check-certificate https://emian.zcu.cz:8443/jenkins/view/indigo/job/third-party/network=ipv4,platform=epel-7-x86_64/lastSuccessfulBuild/artifact/results/rubygem-tilt-2.0.4-1.el7.centos.noarch.rpm
+#wget --no-check-certificate https://emian.zcu.cz:8443/jenkins/view/indigo/job/third-party/network=ipv4,platform=epel-7-x86_64/lastSuccessfulBuild/artifact/results/rubygem-ipaddress-0.8.3-1.el7.centos.noarch.rpm
+#wget --no-check-certificate https://emian.zcu.cz:8443/jenkins/view/indigo/job/third-party/network=ipv4,platform=epel-7-x86_64/lastSuccessfulBuild/artifact/results/rubygem-sinatra-1.4.7-1.el7.centos.noarch.rpm
+#wget --no-check-certificate https://emian.zcu.cz:8443/jenkins/view/indigo/job/third-party/network=ipv4,platform=epel-7-x86_64/lastSuccessfulBuild/artifact/results/rubygem-sinatra-cross_origin-0.3.2-2.el7.centos.noarch.rpm
+#yum install *.rpm
+
+yum install -y NOW
 
 systemctl enable httpd
 service httpd restart
