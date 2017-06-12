@@ -31,6 +31,8 @@ if ( ! grep "Listen\s*11443" /etc/httpd/conf/httpd.conf); then \
 echo Listen 11443 >> /etc/httpd/conf/httpd.conf; fi
 mv /etc/httpd/conf.d/ssl.conf /etc/httpd/conf.d/ssl.conf_not_used
 
+# not necessary
+sed -i s'/^Listen 80/#Listen 80/' /etc/httpd/conf/httpd.conf
 
 # generate self-signed server certificate
 unalias -a
