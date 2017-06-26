@@ -32,3 +32,10 @@ yum install -y pyOpenSSL
 
 systemctl enable im
 systemctl start im
+
+echo
+echo if you want to configure VM via ssh, add following lines to /etc/ssh/ssh_config and restart sshd
+echo "   StrictHostKeyChecking no"
+echo "   UserKnownHostsFile /dev/null"
+echo
+
