@@ -1,7 +1,26 @@
-/tmp/token - token from WaTTS (show token)
-/tmp/radl - basic radl:
+Basic usecases for testing IM REST API
+======================================
 
-# kvm
+For the testing purposes we assump:
+
+* curl installed 
+* WaTTS token stored in /tmp/token
+* RADL stored in /tmp/radl
+
+
+Testing is done using following curl commands (create/list/delete infrastructure):
+
+ curl  -H "Authorization: Bearer `cat /tmp/token`" -H "Content-Type: text/plain" -X POST --data-binary "@/tmp/radl"  https://one5.ncg.ingrid.pt:8800/infrastructures
+ curl  -H "Authorization: Bearer `cat /tmp/token`" -H "Content-Type: text/plain" -X GET --data-binary "@/tmp/radl"  https://one5.ncg.ingrid.pt:8800/infrastructures
+ curl  -H "Authorization: Bearer `cat /tmp/token`" -H "Content-Type: text/plain" -X DELETE --data-binary "@/tmp/radl"  https://one5.ncg.ingrid.pt:8800/infrastructures/ID
+
+
+where following RADL files are used:
+
+
+Usecase I - simple kvm VM, local network only
+---------------------------------------------
+
 network example (outbound = 'no')
 system small_node (
    cpu.arch = 'x86_64' and
@@ -9,14 +28,32 @@ system small_node (
    memory.size >= 512M and
    net_interface.0.connection = 'example' and
    disk.0.os.name = 'linux' and
-   disk.0.os.credentials.username = 'ubuntu' and
-   disk.0.os.credentials.password = 'password' and
    disk.0.image.url = 'one://one5.ncg.ingrid.pt/0'
 )
 deploy small_node 1
 
-# docker
-network radl_private (outbound = 'no' and provider_id='private')
+
+
+Usecase II - simple docker VM, private network only
+---------------------------------------------------
+
+network radl_private (outbound = 'yes' and provider_id='private')
+system small_node (
+   cpu.arch = 'x86_64' and
+   cpu.count = 1 and
+   memory.size >= 512M and
+   net_interface.0.connection = 'radl_private' and
+   disk.0.os.name = 'linux' and
+   disk.0.image.url = 'one://one5.ncg.ingrid.pt/4'
+)
+deploy small_node 1
+
+
+
+Usecase III - simple docker VM, private network only, basic VM configuration
+----------------------------------------------------------------------------
+
+network radl_private (outbound = 'yes' and provider_id='private')
 system small_node (
    cpu.arch = 'x86_64' and
    cpu.count = 1 and
@@ -25,14 +62,31 @@ system small_node (
    disk.0.os.name = 'linux' and
    disk.0.os.credentials.username = 'root' and
    disk.0.os.credentials.password = 'root' and
+   disk.0.os.credentials.new.password = 'Somepass+1' and
    disk.0.image.url = 'one://one5.ncg.ingrid.pt/4'
+)
+configure small_node (
+@begin
+---
+  - tasks:
+    - name: sleep
+      command: sleep 5
+
+    - name: test
+      debug: msg="THIS A TEST!!"
+
+    - name: touch
+      command: touch /tmp/I_was_here
+
+    - name: Set authorized key took from file
+      authorized_key:
+        user: root
+        state: present
+        key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDIqHiY/pnWtgUEB4e4X94WOsDtfvLcLpc7m2ZY9lXeaIiaf/j/FeuqBGa0VR0DX/8CuMwjTRFk7OCAvCTjzX4lQBj1rcjS6Guv5G+4u3zT9CxANwtLlGJ5K6TdMP4RdpYnR/+E6/UR5rE6f3S6aR+YKAZHMqTWG1TPQYDoC14bPKZv3bFdOi+fLLVk2+5NHRBTBg4KQI8U4dCUpP16r4e1LQG1p//rZwbUw4sBOE6z3usHiUkjuSFzVD502Eiyz4N85PbV71vXOnzUL2Mat5mTsYAVOyh/SgMYqXaRpg7gr7CZ4lEDU6FCDgmNC6/Gq7U3XjDIt3lz2fI8sJmv9kUL root@one5.ncg.ingrid.pt"
+@end
 )
 deploy small_node 1
 
 
-curl  -H "Authorization: Bearer `cat /tmp/token`" -H "Content-Type: text/plain" -X POST -d "@/tmp/radl"  https://one5.ncg.ingrid.pt:8800/infrastructures
-curl  -H "Authorization: Bearer `cat /tmp/token`" -H "Content-Type: text/plain" -X GET -d "@/tmp/radl"  https://one5.ncg.ingrid.pt:8800/infrastructures
-curl  -H "Authorization: Bearer `cat /tmp/token`" -H "Content-Type: text/plain" -X DELETE -d "@/tmp/radl"  https://one5.ncg.ingrid.pt:8800/infrastructures/ID
-
-# in case ONe/IM states mismatch
-# systemctl stop im ; rm /etc/im/inf.dat; systemctl start im
+----
+Note: in the case of ONe/IM states mismatch, run something like: 'systemctl stop im ; rm /etc/im/inf.dat; systemctl start im'
