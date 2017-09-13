@@ -1,3 +1,65 @@
+# on ONe master node
+
+# load dummy kernel module
+modprobe dummy numdummies=1
+
+# make it persistent
+echo "options dummy numdummies=1" > /etc/modprobe.d/dummy.conf
+echo "options dummy numdummies=1" > /etc/modprobe.d/dummy.conf
+
+# make vxlan bridge
+cat > /etc/sysconfig/network-scripts/ifcfg-onebr0-vxlan <<EOF
+DEVICE=onebr0-vxlan
+TYPE=Bridge
+IPADDR=10.0.0.1
+NETMASK=255.255.255.0
+ONBOOT=yes
+DELAY=0
+NM_CONTROLLED=no
+BOOTPROTO=none
+EOF
+
+# make dummy eth interface, add it to vxlan bridge
+cat > /etc/sysconfig/network-scripts/ifcfg-dummy0 <<EOF
+DEVICE=dummy0
+BOOTPROTO=none
+IPV6INIT=no
+NAME="dummy0"
+ONBOOT=yes
+TYPE=Ethernet
+USERCTL=no
+BRIDGE=onebr0-vxlan
+NM_CONTROLLED=no
+EOF
+
+# bring all up
+service network restart
+
+# create vxlan endpoint
+cat > /etc/systemd/system/vxlan.service  <<EOF
+[Unit]
+Description=VXLAN interface endpoint
+After=network.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/sbin/ip link add eth0.100 type vxlan id 100 group 239.0.0.100 ttl 16 dstport 0 dev eth0
+ExecStart=/sbin/ip link set eth0.100 up 
+ExecStart=/sbin/brctl addif onebr0-vxlan eth0.100
+#ExecReload=
+ExecStop=/sbin/ip link del eth0.100
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# activate service
+systemctl daemon-reload
+systemctl enable vxlan.service
+systemctl start vxlan.service
+
+
 export BR=my-onebr2
 brctl addbr $BR
 ip link add eth0.100  type vxlan id 100 group 239.0.0.100 ttl 16 dstport 0 dev eth0
