@@ -21,6 +21,8 @@ chmod 640 /etc/watts/watts.conf
 # general configuration
 #
 cat >/etc/watts/watts.conf <<EOF
+nodename = watts@127.0.0.1
+distributed_cookie = watts
 hostname = `hostname`
 port = 443
 listen_port = 8443
