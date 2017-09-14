@@ -31,8 +31,8 @@ yum -y install jq xmlstarlet
  
 #XXX: still not working yum -y install onedock-master
 cd /var/tmp
-wget wget https://github.com/indigo-dc/onedock/releases/download/v1.1/onedock-master-1.1-1.noarch.rpm
-rpm -i onedock-master-1.1-1.noarch.rpm --replacefiles
+wget http://repo.indigo-datacloud.eu/repository/indigo/2/centos7/x86_64/updates/onedock-master-1.2-1.noarch.rpm -O onedock-master
+rpm -i onedock-master --replacefiles
 service opennebula restart
 
 # XXX: remove wrong/duplicate lines
