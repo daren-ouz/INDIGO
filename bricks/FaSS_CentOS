@@ -9,3 +9,5 @@ EOF
 
 yum install influxdb
 systemctl start influxdb
+
+# XXX: Install FaSS, not installable now due to RPM constraints
